@@ -1,3 +1,5 @@
+package animelog4.mainactivity;
+
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -10,7 +12,9 @@ public class App {
 		
 		Load load = new Load();
 		load.tva();
+		load.watcingTVA();
 		load.movie();
+		load.userInfo();
 		
 		MainFrame frame = new MainFrame("Anime Log Ⅳ");
 		frame.setVisible(true);
