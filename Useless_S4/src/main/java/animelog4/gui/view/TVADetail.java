@@ -1,6 +1,7 @@
 package animelog4.gui.view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,9 +14,12 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
@@ -29,12 +33,17 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import animelog4.collection.TypeCollection;
+import animelog4.collection.UserInfo;
 import animelog4.gui.component.ALDialog;
 import animelog4.gui.component.ALTable;
 import animelog4.gui.component.RequestFocusListener;
+import animelog4.type.MovieSeries;
 import animelog4.type.TVA;
 import animelog4.type.TVASeries;
 
@@ -102,6 +111,7 @@ public class TVADetail {
 			}
 		};
 		
+		table.setValueAt("#" + left[representValue + 1], representValue + 1, 0);
 		table.setCellSelectionEnabled(true);
 		table.setShowHorizontalLines(true);
 		table.getTableHeader().setVisible(false);
@@ -115,7 +125,12 @@ public class TVADetail {
 						if ( row != 1 && row != 2 && row != 3 ) return;
 						if ( JOptionPane.showConfirmDialog(di, String.format("대푯값을 %s 으로 바꾸시겠습니까?", left[row]), "대푯값 수정", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION )
 							return;
-						representValue = row - 1;						
+						if ( !((String) table.getValueAt(row, 0)).contains("#") ) {
+							table.setValueAt(left[representValue + 1], representValue + 1, 0);
+							representValue = row - 1;
+							table.setValueAt("#" + left[representValue + 1], representValue + 1, 0);
+							setTitleChanged(di, "상세정보");
+						}
 					}
 					else if ( table.getSelectedColumn() == 1 ) {
 						if ( (row = table.getSelectedRow()) == 0 ) {
@@ -180,10 +195,16 @@ public class TVADetail {
 										return;
 								} while ( series.getText().trim().isEmpty() );
 								
-								if ( chbox.isSelected() ) table.setValueAt(series.getText(), row, 1);
+								if ( chbox.isSelected() ) {
+									table.setValueAt(series.getText(), row, 1);
+									setTitleChanged(di, "상세정보");
+								}
 								else {
 									TVASeries ts = (TVASeries) cbx.getSelectedItem();
-									table.setValueAt(ts, row, 1);
+									if ( table.getValueAt(row, 1) instanceof String || !ts.equals(table.getValueAt(row, 1)) ) {
+										setTitleChanged(di, "상세정보");
+										table.setValueAt(ts, row, 1);
+									}
 								}
 							}
 						}
@@ -200,7 +221,10 @@ public class TVADetail {
 							p.add(cbx);
 							p.add(t);
 							JOptionPane.showMessageDialog(di, p, "제작사", JOptionPane.PLAIN_MESSAGE);
-							table.setValueAt(t.getText(), row, 1);
+							if ( !((String) table.getValueAt(row, 1)).equals(t.getText()) ) {
+								table.setValueAt(t.getText(), row, 1);
+								setTitleChanged(di, "상세정보");
+							}
 						}
 					}
 				}
@@ -208,6 +232,8 @@ public class TVADetail {
 		});
 		table.addPropertyChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
+				if ( table.isEditing() ) setTitleChanged(di, "상세정보");
+				
 				int row;
 				if ( table.getSelectedColumn() == 1 ) {
 					if ( (row = table.getSelectedRow()) == 5 ) {
@@ -253,6 +279,17 @@ public class TVADetail {
 		
 		final JTextArea ta = new JTextArea(4, 20);
 		ta.setText(tva.getNote());
+		ta.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) {
+				setTitleChanged(di, "상세정보");
+			}
+			public void removeUpdate(DocumentEvent e) {
+				setTitleChanged(di, "상세정보");
+			}
+			public void changedUpdate(DocumentEvent e) {
+				setTitleChanged(di, "상세정보");
+			}
+		});
 		
 		GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -275,7 +312,7 @@ public class TVADetail {
 		gbl.setConstraints(sp, gbc);
 		gridbag.add(sp);
 		
-		JButton save = new JButton("저장");
+		final JButton save = new JButton("저장");
 		JButton divide = new JButton("분할");
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -347,13 +384,15 @@ public class TVADetail {
 					}
 				}
 				
-				sourceTable.setValueAt(ts.getTitleFrontChar(2), row, 0);
+				sourceTable.setValueAt(ts.getTitleFrontChar(), row, 0);
 				sourceTable.setValueAt(kor, row, 1);
 				sourceTable.setValueAt(eng, row, 2);
 				sourceTable.setValueAt(jpn, row, 3);
 				sourceTable.setValueAt(pd, row, 4);
 				sourceTable.setValueAt(qtr, row, 5);
 				sourceTable.getModel().setValueAt(tva.getAddress(), sourceTable.convertRowIndexToModel(row), 6);
+				
+				di.setTitle("상세정보");
 			}
 		});
 		
@@ -361,6 +400,19 @@ public class TVADetail {
 		south.add(save);
 		south.add(divide);
 		
+		di.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				UserInfo ui = UserInfo.getInstance();
+				if ( !ui.getSavePopUp() ) {
+					if ( di.getTitle().contains("*") ) {
+						JCheckBox chbx = new JCheckBox("다시 표시하지 않기");
+						int ans = JOptionPane.showConfirmDialog(di, new Object[] { "변경사항이 있습니다.\n저장하시겠습니까?" , chbx }, "변경사항", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						if ( chbx.isSelected() ) UserInfo.getInstance().setSavePopUp(true);
+						if ( ans == JOptionPane.YES_OPTION ) save.doClick();
+					}
+				}
+			}
+		});
 		di.add(gridbag);
 		di.add(south, BorderLayout.SOUTH);
 		
@@ -371,20 +423,81 @@ public class TVADetail {
 		di.setVisible(true);
 	}
 	
-	public void showSeriesDialog(String seriesKey) {	// it's not done, has to be fixed - save, list action
+	public void showSeriesDialog(String seriesKey) {
 		final ALDialog di = new ALDialog("시리즈 정보");
-		TVASeries ts = tc.getTVAMap().get(seriesKey);
+		final ALTable sourceTable = BasePanel.getInstance().getElementPanel().getTable();
+		final TVASeries ts = tc.getTVAMap().get(seriesKey);
 		
-		JTextField tf = new JTextField(ts.getTitle());
+		final JTextField tf = new JTextField(ts.getTitle());
 		tf.setHorizontalAlignment(JTextField.CENTER);
+		tf.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) {
+				setTitleChanged(di, "시리즈 정보");
+			}
+			public void removeUpdate(DocumentEvent e) {
+				setTitleChanged(di, "시리즈 정보");
+			}
+			public void changedUpdate(DocumentEvent e) {
+				setTitleChanged(di, "시리즈 정보");
+			}
+		});
 		
 		Vector<TVA> v = new Vector<TVA>(ts.getElementMap().values());
-		JList<TVA> list = new JList<TVA>(v);
+		final JList<TVA> list = new JList<TVA>(v);
 		list.setFixedCellHeight(30);
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if ( e.getClickCount() == 2 ) {
+					di.dispose();
+					showElementDialog(list.getSelectedValue().getAddress());
+				}
+			}
+		});
 		
 		JButton save = new JButton("저장");
+		save.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ts.setTitle(tf.getText());
+				di.setTitle("시리즈 정보");
+				String s = ts.getTitleFrontChar();
+				for (int i=0; i<sourceTable.getRowCount(); i++) {
+					String value = (String) sourceTable.getModel().getValueAt(sourceTable.convertRowIndexToModel(i), 6);
+					if ( value.contains(ts.getKey()) ) {
+						sourceTable.getModel().setValueAt(s, sourceTable.convertRowIndexToModel(i), 0);
+						if ( (i + 1) == ts.getElementMap().size() ) return;
+					}
+				}
+			}
+		});
 		
-		di.add(tf, BorderLayout.NORTH);
+		if ( ts.isHavingMovie() ) {
+			final JTextField movie = new JTextField("극장판 확인 (더블클릭)");
+			movie.setEditable(false);
+			movie.setBackground(Color.WHITE);
+			movie.setHorizontalAlignment(JTextField.CENTER);
+			movie.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					if ( e.getClickCount() == 2 ) {
+						Map<String, MovieSeries> map = tc.getMovieMap();
+						for ( String key : map.keySet() ) {
+							String movieSeriesKey = map.get(key).getTVASeriesKey();
+							if ( movieSeriesKey.equals(ts.getKey()) ) {
+								di.dispose();
+								new MovieDetail().showSeriesDialog(map.get(key).getKey());
+							}
+						}
+					}
+				}
+			});
+			
+			JPanel p = new JPanel(new GridLayout(2, 1));
+			p.add(tf);
+			p.add(movie);
+			di.add(p, BorderLayout.NORTH);
+		}
+		else di.add(tf, BorderLayout.NORTH);
+		
 		di.add(list);
 		di.add(save, BorderLayout.SOUTH);
 		
@@ -393,6 +506,10 @@ public class TVADetail {
 		di.setLocationRelativeTo(upperComponent);
 		di.setModal(true);
 		di.setVisible(true);
+	}
+	
+	private void setTitleChanged(ALDialog di, String s) {
+		di.setTitle("*" + s);
 	}
 	
 }

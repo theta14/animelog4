@@ -80,7 +80,7 @@ public class ElementAddEvent {
 					}
 					tc.getTVAMap().get(ts.getKey()).add(t);
 				}
-				String row[] = { ts.getTitleFrontChar(2), t.getKOR(), t.getENG(), t.getJPN(), t.getPD(), Integer.toString(t.getQTR()), t.getAddress() };
+				String row[] = { ts.getTitleFrontChar(), t.getKOR(), t.getENG(), t.getJPN(), t.getPD(), Integer.toString(t.getQTR()), t.getAddress() };
 				TVAPanel.getInstance().getTable().getDefaultTableModel().addRow(row);
 				di.dispose();
 			}

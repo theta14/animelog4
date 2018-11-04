@@ -12,6 +12,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import animelog4.collection.TypeCollection;
+import animelog4.collection.UserInfo;
 import animelog4.type.Movie;
 import animelog4.type.MovieSeries;
 import animelog4.type.TVA;
@@ -32,7 +33,7 @@ public class Load {
 	public void tva() {
 		try {
 			String data = getFileContent("data/tva.json");
-			JSONObject parsedData = (JSONObject) new JSONParser().parse(data.toString());
+			JSONObject parsedData = (JSONObject) new JSONParser().parse(data);
 			TypeCollection tc = TypeCollection.getInstance();
 			
 			for ( Object key : parsedData.keySet() ) {
@@ -60,7 +61,7 @@ public class Load {
 	public void watcingTVA() {
 		try {
 			String data = getFileContent("data/watchingTVA.json");
-			JSONObject parsedData = (JSONObject) new JSONParser().parse(data.toString());
+			JSONObject parsedData = (JSONObject) new JSONParser().parse(data);
 			TypeCollection tc = TypeCollection.getInstance();
 			
 			for ( Object key : parsedData.keySet() ) {
@@ -81,7 +82,7 @@ public class Load {
 	public void movie() {
 		try {
 			String data = getFileContent("data/movie.json");
-			JSONObject parsedData = (JSONObject) new JSONParser().parse(data.toString());
+			JSONObject parsedData = (JSONObject) new JSONParser().parse(data);
 			TypeCollection tc = TypeCollection.getInstance();
 			
 			for ( Object key : parsedData.keySet() ) {
@@ -102,6 +103,31 @@ public class Load {
 		}
 		catch(ParseException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void userInfo() {
+		UserInfo info = UserInfo.getInstance();
+		try {
+			String data = getFileContent("data/userInfo.json");
+			JSONObject parsedData = (JSONObject) new JSONParser().parse(data);
+			
+			info.setSavePopUp((Boolean) parsedData.get("savePopUp"));
+			info.setImageFilePath((String) parsedData.get("imageFilePath"));
+			info.setSelectedTVAHeader(((Long) parsedData.get("selectedTVAHeader")).intValue());
+			info.setSelectedMovieHeader(((Long) parsedData.get("selectedMovieHeader")).intValue());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		catch(ParseException e) {
+			e.printStackTrace();
+		}
+		catch(NullPointerException e) {
+			info.setSavePopUp(false);
+			info.setImageFilePath(System.getProperty("user.home") + "//Desktop");
+			info.setSelectedTVAHeader(0);
+			info.setSelectedMovieHeader(0);
 		}
 	}
 }

@@ -10,6 +10,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import animelog4.collection.TypeCollection;
+import animelog4.collection.UserInfo;
 import animelog4.type.Movie;
 import animelog4.type.MovieSeries;
 import animelog4.type.TVA;
@@ -87,6 +88,17 @@ public class Save {
 		}
 		
 		putFileContent("data/movie.json", jsonObject.toJSONString());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void userInfo() {
+		UserInfo info = UserInfo.getInstance();
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("savePopUp", info.getSavePopUp());
+		jsonObject.put("imageFilePath", info.getImageFilePath());
+		jsonObject.put("selectedTVAHeader", info.getSelectedTVAHeader());
+		jsonObject.put("selectedMovieHeader", info.getSelectedMovieHeader());
+		putFileContent("data/userInfo.json", jsonObject.toJSONString());
 	}
 	
 }

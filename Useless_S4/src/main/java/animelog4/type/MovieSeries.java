@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MovieSeries extends Series<Movie> {
+public class MovieSeries extends Series<Movie> implements Comparable<MovieSeries> {
 	private String TVASeriesKey;
 	
 	public MovieSeries(String TVASeriesKey) {
@@ -22,6 +22,10 @@ public class MovieSeries extends Series<Movie> {
 		StringBuilder sb = new StringBuilder(TypeCollection.getInstance().getTVAMap().get(TVASeriesKey).getTitle());
 		sb.append(" 극장판");
 		return sb.toString();
+	}
+
+	public int compareTo(MovieSeries ms) {
+		return toString().compareTo(ms.toString());
 	}
 	
 }

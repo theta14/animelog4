@@ -1,6 +1,8 @@
 package animelog4.gui.view;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -8,6 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 import animelog4.collection.TypeCollection;
+import animelog4.collection.UserInfo;
 import animelog4.gui.component.ALTable;
 import animelog4.gui.event.ElementRemoveEvent;
 
@@ -24,8 +27,15 @@ public class TVAPanel extends JPanel implements TypePanel {
 		DefaultTableModel dtm = new DefaultTableModel();
 		dtm.setDataVector(TypeCollection.getInstance().toTVAArray(), header);
 		table = new ALTable(dtm);
-		table.sortAs(0);
 		table.addKeyListener(new ElementRemoveEvent().getKeyListener());
+		
+		final UserInfo ui = UserInfo.getInstance();
+		table.sortAs(ui.getSelectedTVAHeader());
+		table.getTableHeader().addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				ui.setSelectedTVAHeader(table.columnAtPoint(e.getPoint()));
+			}
+		});
 		
 		TVADetail td = new TVADetail();
 		table.addMouseListener(td.getElementMouseListener());

@@ -20,10 +20,13 @@ public class TVASeries extends Series<TVA> implements Comparable<TVASeries> {
 		this.havingMovie = havingMovie;
 	}
 	
-	public String getTitleFrontChar(int i) {
+	/**
+	 * Get front 2 letters of the title 
+	 * */
+	public String getTitleFrontChar() {
 		String s = title.replaceAll(" ", "");
 		try {
-			return s.substring(0, i);
+			return s.substring(0, 2);
 		}
 		catch(StringIndexOutOfBoundsException e) {
 			return s.substring(0, s.length());

@@ -49,7 +49,7 @@ public class TVA implements ElementType {
 	}
 	
 	public String[] toArray() {
-		String s = TypeCollection.getInstance().getTVAMap().get(seriesKey).getTitleFrontChar(2);
+		String s = TypeCollection.getInstance().getTVAMap().get(seriesKey).getTitleFrontChar();
 		return new String[] { s, KOR, ENG, JPN, PD, Integer.toString(QTR), getAddress() };
 	}
 	
