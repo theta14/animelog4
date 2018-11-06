@@ -46,6 +46,7 @@ public class BasePanel extends JPanel {
 		add.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AddToCollection atc = isTVAPanelOn ? new AddToTVA() : new AddToMovie();
+				atc.setDialog();
 				atc.addEventToCollection();
 				atc.show();
 			}

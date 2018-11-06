@@ -31,27 +31,33 @@ import animelog4.gui.component.RequestFocusListener;
 import animelog4.gui.event.ElementAddEvent;
 import animelog4.type.MovieSeries;
 import animelog4.type.TVASeries;
+import lombok.Getter;
 
+@Getter
 public class AddToMovie implements AddToCollection {
 	private ALDialog di;
 	private GridBagLayout gbl;
 	private GridBagConstraints gbc;
 	private JPanel center;
 	
-	private JComboBox<TVASeries> cbx;
-	private JTextField tf[];
-	private JSpinner spnr;
-	private JTextArea ta;
-	private JButton save;
+	JComboBox<TVASeries> cbx;
+	JTextField tf[];
+	JSpinner spnr;
+	JTextArea ta;
+	JButton save;
 	
 	public AddToMovie() {
 		di = new ALDialog("추가");
-		final TypeCollection tc = TypeCollection.getInstance();
-		
 		gbl = new GridBagLayout();
 		gbc = new GridBagConstraints();
-		
 		center = new JPanel();
+		tf = new JTextField[s.length];
+		ta = new JTextArea(4, fieldSize);
+		spnr = new JSpinner();
+	}
+	
+	public void setDialog() {
+		final TypeCollection tc = TypeCollection.getInstance();
 		center.setLayout(gbl);
 		
 		gbc.fill = GridBagConstraints.BOTH;
@@ -65,15 +71,11 @@ public class AddToMovie implements AddToCollection {
 		add(new JLabel("원작", JLabel.CENTER), 0, 0, 1, 1);
 		add(cbx, 1, 0, 2, 1);
 		
-		final String s[] = { "KOR", "ENG", "JPN", "제작사" };
-		final int fieldSize = 20;
-		tf = new JTextField[s.length];
 		for (int i=0; i<tf.length; i++) {
 			tf[i] = new JTextField(fieldSize);
 			add(new JLabel(s[i], JLabel.CENTER), 0, i+1, 1, 1);
 			add(tf[i], 1, i+1, 2, 1);
 		}
-		ta = new JTextArea(4, fieldSize);
 		
 		tf[3].setEditable(false);
 		tf[3].setBackground(Color.WHITE);
@@ -95,7 +97,6 @@ public class AddToMovie implements AddToCollection {
 			}
 		});
 		
-		spnr = new JSpinner();
 		spnr.setModel(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
 		JComponent editor = spnr.getEditor();
 		if ( editor instanceof JSpinner.DefaultEditor ) {

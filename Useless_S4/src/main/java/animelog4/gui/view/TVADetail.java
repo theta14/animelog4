@@ -31,9 +31,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
@@ -393,6 +395,48 @@ public class TVADetail {
 				sourceTable.getModel().setValueAt(tva.getAddress(), sourceTable.convertRowIndexToModel(row), 6);
 				
 				di.setTitle("상세정보");
+			}
+		});
+		divide.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if ( tva.getQTR() == 1 ) {
+					JOptionPane.showMessageDialog(di, "분할은 2쿨 이상만 가능합니다.", "분할 에러", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				JSpinner spnr = new JSpinner();
+				spnr.setModel(new SpinnerNumberModel(2, 2, tva.getQTR(), 1));
+				// don't know why, but the spinner's align cannot be center
+				if ( JOptionPane.showConfirmDialog(di, new Object[] { "분할할 개수를 입력해주세요.", spnr }, "분할", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION )
+					return;
+				
+				final int div = (Integer) spnr.getValue();
+				JPanel grid = new JPanel(new GridLayout(1, div));
+				AddToTVA att[] = new AddToTVA[div];
+				for (int i=0; i<div; i++) {
+					att[i] = new AddToTVA();
+					att[i].getRbtn()[tva.getRepresentValue()].setSelected(true);
+					att[i].getTf()[0].setText(tva.getKOR());
+					att[i].getTf()[1].setText(tva.getENG());
+					att[i].getTf()[2].setText(tva.getJPN());
+					att[i].getTf()[3].setText(tva.getPD());
+					att[i].getSpnr().setModel(new SpinnerNumberModel(tva.getQTR(), 1, tva.getQTR(), 1));
+					JSpinner.DefaultEditor spnrEditor = (JSpinner.DefaultEditor) att[i].getSpnr().getEditor();
+					spnrEditor.getTextField().setHorizontalAlignment(JTextField.CENTER);
+					att[i].getSeason().setValue(tva.getSeason() + "기");
+					att[i].getTa().setText(tva.getNote());
+					att[i].setDialog();
+					grid.add(att[i].getCenter());
+				}
+				
+				ALDialog divDialog = new ALDialog("분할");
+				divDialog.add(grid);
+				divDialog.add(new JButton("저장"), BorderLayout.SOUTH);
+				divDialog.pack();
+				divDialog.setLocationRelativeTo(di);
+				di.dispose();
+				divDialog.setModal(true);
+				divDialog.setVisible(true);
 			}
 		});
 		

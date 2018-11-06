@@ -125,7 +125,7 @@ public class Load {
 		}
 		catch(NullPointerException e) {
 			info.setSavePopUp(false);
-			info.setImageFilePath(System.getProperty("user.home") + "//Desktop");
+			info.setImageFilePath(System.getProperty("user.home") + "/Desktop");
 			info.setSelectedTVAHeader(0);
 			info.setSelectedMovieHeader(0);
 		}
