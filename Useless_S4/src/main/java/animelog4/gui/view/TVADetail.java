@@ -19,7 +19,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
@@ -45,7 +44,7 @@ import animelog4.collection.UserInfo;
 import animelog4.gui.component.ALDialog;
 import animelog4.gui.component.ALTable;
 import animelog4.gui.component.RequestFocusListener;
-import animelog4.type.MovieSeries;
+import animelog4.gui.event.DividedElementsAdd;
 import animelog4.type.TVA;
 import animelog4.type.TVASeries;
 
@@ -56,7 +55,7 @@ public class TVADetail {
 	
 	public TVADetail() {
 		tc = TypeCollection.getInstance();
-		upperComponent = BasePanel.getInstance();
+		upperComponent = TVAPanel.getInstance();
 	}
 	
 	public TVADetail(Component upperComponent) {
@@ -412,7 +411,7 @@ public class TVADetail {
 				
 				final int div = (Integer) spnr.getValue();
 				JPanel grid = new JPanel(new GridLayout(1, div));
-				AddToTVA att[] = new AddToTVA[div];
+				final AddToTVA att[] = new AddToTVA[div];
 				for (int i=0; i<div; i++) {
 					att[i] = new AddToTVA();
 					att[i].getRbtn()[tva.getRepresentValue()].setSelected(true);
@@ -429,9 +428,34 @@ public class TVADetail {
 					grid.add(att[i].getCenter());
 				}
 				
-				ALDialog divDialog = new ALDialog("분할");
+				final ALDialog divDialog = new ALDialog("분할");
 				divDialog.add(grid);
-				divDialog.add(new JButton("저장"), BorderLayout.SOUTH);
+				JButton save = new JButton("저장");
+				save.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						if ( JOptionPane.showConfirmDialog(divDialog, "저장하시겠습니까?", "저장", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION )
+							return;
+						DividedElementsAdd dea = new DividedElementsAdd();
+						String message = dea.toTVACollection(tva, att);
+						if ( message != null ) {
+							JOptionPane.showMessageDialog(divDialog, message, "분할 에러", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						for (int i=0; i<sourceTable.getRowCount(); i++)
+							if ( ((String) sourceTable.getModel().getValueAt(i, 6)).equals(tva.getAddress()) )
+								sourceTable.getDefaultTableModel().removeRow(i);
+						
+						TVA t[] = dea.getTVAArray();
+						String frontChar = tc.getTVAMap().get(tva.getSeriesKey()).getTitleFrontChar();
+						for (int i=0; i<t.length; i++) {
+							String row[] = { frontChar, t[i].getKOR(), t[i].getENG(), t[i].getJPN(), t[i].getPD(), Integer.toString(t[i].getQTR()), t[i].getAddress() };
+							TVAPanel.getInstance().getTable().getDefaultTableModel().addRow(row);
+						}
+						divDialog.dispose();
+					}
+				});
+				divDialog.add(save, BorderLayout.SOUTH);
+				
 				divDialog.pack();
 				divDialog.setLocationRelativeTo(di);
 				di.dispose();
@@ -515,7 +539,7 @@ public class TVADetail {
 			}
 		});
 		
-		if ( ts.isHavingMovie() ) {
+		if ( ts.getMovieSeriesKey() != null ) {
 			final JTextField movie = new JTextField("극장판 확인 (더블클릭)");
 			movie.setEditable(false);
 			movie.setBackground(Color.WHITE);
@@ -523,14 +547,8 @@ public class TVADetail {
 			movie.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					if ( e.getClickCount() == 2 ) {
-						Map<String, MovieSeries> map = tc.getMovieMap();
-						for ( String key : map.keySet() ) {
-							String movieSeriesKey = map.get(key).getTVASeriesKey();
-							if ( movieSeriesKey.equals(ts.getKey()) ) {
-								di.dispose();
-								new MovieDetail().showSeriesDialog(map.get(key).getKey());
-							}
-						}
+						di.dispose();
+						new MovieDetail().showSeriesDialog(ts.getMovieSeriesKey());
 					}
 				}
 			});

@@ -37,7 +37,7 @@ public class TVAPanel extends JPanel implements TypePanel {
 			}
 		});
 		
-		TVADetail td = new TVADetail();
+		TVADetail td = new TVADetail(this);
 		table.addMouseListener(td.getElementMouseListener());
 		table.addKeyListener(td.getElementKeyListener());
 		

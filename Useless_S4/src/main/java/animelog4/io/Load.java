@@ -38,9 +38,9 @@ public class Load {
 			
 			for ( Object key : parsedData.keySet() ) {
 				JSONObject each = (JSONObject) parsedData.get(key);
-				boolean havingMovie = (Boolean) each.get("hasMovie");
+				String movieSeriesKey = (String) each.get("movieSeriesKey");
 				String title = (String) each.get("title");
-				TVASeries ts = new TVASeries(key.toString(), title, havingMovie);
+				TVASeries ts = new TVASeries(key.toString(), title, movieSeriesKey.isEmpty() ? null : movieSeriesKey);
 				
 				JSONArray tvas = (JSONArray) each.get("tvas");
 				for (int i=0; i<tvas.size(); i++) {

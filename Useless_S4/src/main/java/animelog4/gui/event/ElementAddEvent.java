@@ -61,7 +61,7 @@ public class ElementAddEvent {
 					}
 				}
 				if ( representValue == -1 ) {
-					System.out.println("Unknown to set representValue (ElementAddEvent.java:67)");
+					System.out.println("Unknown error while setting representValue (ElementAddEvent.java:64)");
 					return;
 				}
 				

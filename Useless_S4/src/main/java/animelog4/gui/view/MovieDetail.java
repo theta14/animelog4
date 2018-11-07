@@ -253,7 +253,6 @@ public class MovieDetail {
 		gridbag.add(sp);
 		
 		final JButton save = new JButton("저장");
-		JButton divide = new JButton("분할");
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				TVASeries ts = (TVASeries) table.getValueAt(0, 1);
@@ -305,10 +304,10 @@ public class MovieDetail {
 					else newMS = matchedMovieSeries;
 					newMS.add(movie);
 					tc.getMovieMap().put(newMS.getKey(), newMS);
-					ts.setHavingMovie(true);
+					ts.setMovieSeriesKey(newMS.getKey());
 					ms.getElementMap().remove(pastOrder);
 					if ( ms.getElementMap().isEmpty() ) {
-						tc.getTVAMap().get(ms.getTVASeriesKey()).setHavingMovie(false);
+						tc.getTVAMap().get(ms.getTVASeriesKey()).setMovieSeriesKey(null);
 						tc.getMovieMap().remove(ms.getKey());
 					}
 					table.setValueAt(newMS, 1, 1);
@@ -376,12 +375,8 @@ public class MovieDetail {
 		basePanel.add(leftPanel);
 		basePanel.add(rightPanel);
 		
-		JPanel south = new JPanel(new GridLayout(1, 2));
-		south.add(save);
-		south.add(divide);
-		
 		di.add(basePanel);
-		di.add(south, BorderLayout.SOUTH);
+		di.add(save, BorderLayout.SOUTH);
 		di.setSize((int) (width * 2.4), (int) (height * 1.1));
 		di.setLocationRelativeTo(upperComponent);
 		di.setModal(true);

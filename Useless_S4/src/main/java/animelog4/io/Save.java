@@ -43,7 +43,7 @@ public class Save {
 			
 			JSONObject series = new JSONObject();
 			series.put("tvas", arr);
-			series.put("hasMovie", ts.isHavingMovie());
+			series.put("movieSeriesKey", ts.getMovieSeriesKey() == null ? "" : ts.getMovieSeriesKey());
 			series.put("title", ts.getTitle());
 			jsonObject.put(key, series);
 		}

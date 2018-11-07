@@ -1,5 +1,7 @@
 package animelog4.collection;
 
+import java.io.File;
+
 import animelog4.io.Save;
 import lombok.Getter;
 
@@ -52,6 +54,16 @@ public class UserInfo {
 	public void setSelectedMovieHeader(int selectedMovieHeader) {
 		this.selectedMovieHeader = selectedMovieHeader;
 		save.userInfo();
+	}
+	
+	public String getImageFilePath() {
+		try {
+			if ( new File(imageFilePath).isDirectory() ) return imageFilePath;
+			return imageFilePath = System.getProperty("user.home") + "/Desktop";
+		}
+		catch(NullPointerException e) {
+			return imageFilePath = System.getProperty("user.home") + "/Desktop";
+		}
 	}
 	
 }

@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import animelog4.gui.component.ALTable;
+import animelog4.gui.view.MoviePanel;
 import animelog4.type.Movie;
 import animelog4.type.MovieSeries;
 import animelog4.type.TVA;
@@ -46,7 +48,27 @@ public class TypeCollection {
 	
 	public TVA removeTVAByAddress(String address) {
 		String s[] = address.split("@");
-		return tvaMap.get(s[0]).getElementMap().remove(Integer.parseInt(s[1]));
+		TVASeries ts = tvaMap.get(s[0]);
+		TVA tva = ts.getElementMap().remove(Integer.parseInt(s[1]));
+		if ( ts.getElementMap().isEmpty() ) {
+			if ( ts.getMovieSeriesKey() != null ) {
+				ALTable table = MoviePanel.getInstance().getTable();
+				MovieSeries ms = movieMap.get(ts.getMovieSeriesKey());
+				int n = 0;
+				Outer: for (int i=table.getRowCount()-1; i>=0; i--) {
+					for ( int intKey : ms.getElementMap().keySet() ) {
+						if ( ms.getElementMap().get(intKey).getAddress().equals((String) table.getModel().getValueAt(i, 5)) ) {
+							table.getDefaultTableModel().removeRow(i);
+							n++;
+							if ( n == ms.getElementMap().size() ) break Outer;
+						}
+					}
+				}
+				movieMap.remove(ts.getMovieSeriesKey());
+			}
+			tvaMap.remove(s[0]);
+		}
+		return tva;
 	}
 	
 	public Movie getMovieByAddress(String address) {
@@ -56,7 +78,12 @@ public class TypeCollection {
 	
 	public Movie removeMovieByAddress(String address) {
 		String s[] = address.split("@");
-		return movieMap.get(s[0]).getElementMap().remove(Integer.parseInt(s[1]));
+		Movie movie = movieMap.get(s[0]).getElementMap().remove(Integer.parseInt(s[1]));
+		if ( movieMap.get(s[0]).getElementMap().isEmpty() ) {
+			tvaMap.get(movieMap.get(s[0]).getTVASeriesKey()).setMovieSeriesKey(null);
+			movieMap.remove(s[0]);
+		}
+		return movie;
 	}
 	
 	public String[][] toTVAArray() {

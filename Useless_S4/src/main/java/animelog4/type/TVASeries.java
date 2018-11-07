@@ -7,17 +7,21 @@ import lombok.Setter;
 @Setter
 public class TVASeries extends Series<TVA> implements Comparable<TVASeries> {
 	private String title;
-	private boolean havingMovie;
+//	private boolean havingMovie;
+	private String movieSeriesKey;
 	
 	public TVASeries(String title) {
 		this.title = title;
-		havingMovie = false;
+//		havingMovie = false;
+		movieSeriesKey = null;
 	}
 	
-	public TVASeries(String key, String title, boolean havingMovie) {
+//	public TVASeries(String key, String title, boolean havingMovie) {
+	public TVASeries(String key, String title, String movieSeriesKey) {
 		setKey(key);
 		this.title = title;
-		this.havingMovie = havingMovie;
+//		this.havingMovie = havingMovie;
+		this.movieSeriesKey = movieSeriesKey;
 	}
 	
 	/**
