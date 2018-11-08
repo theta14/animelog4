@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import animelog4.collection.TypeCollection;
 import animelog4.gui.event.ElementRemoveEvent;
+import animelog4.gui.event.MenuListener;
 import animelog4.type.Movie;
 import animelog4.type.TVA;
 
@@ -53,6 +54,7 @@ public class BasePanel extends JPanel {
 		});
 		remove.addActionListener(new ElementRemoveEvent().getActionListener());
 		
+		menu.addActionListener(new MenuListener(this));
 		menu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ArrayList<String> a = new ArrayList<String>();
@@ -62,7 +64,6 @@ public class BasePanel extends JPanel {
 					Map<Integer, TVA> map = tc.getTVAMap().get(key).getElementMap();
 					for ( int intKey : map.keySet() ) {
 						a.add("{" + map.get(intKey).getKOR() + " / " + map.get(intKey).getAddress() + "}");
-//						System.out.println(map.get(intKey).getKOR() + " / " + map.get(intKey).getAddress());
 					}
 				}
 				Collections.sort(a);

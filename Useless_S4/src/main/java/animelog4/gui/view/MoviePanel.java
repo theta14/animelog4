@@ -54,4 +54,8 @@ public class MoviePanel extends JPanel implements TypePanel {
 	public ALTable getTable() {
 		return table;
 	}
+	
+	public int getType() {
+		return MOVIE;
+	}
 }

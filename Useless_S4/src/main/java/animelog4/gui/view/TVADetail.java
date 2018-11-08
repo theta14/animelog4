@@ -422,7 +422,7 @@ public class TVADetail {
 					att[i].getSpnr().setModel(new SpinnerNumberModel(tva.getQTR(), 1, tva.getQTR(), 1));
 					JSpinner.DefaultEditor spnrEditor = (JSpinner.DefaultEditor) att[i].getSpnr().getEditor();
 					spnrEditor.getTextField().setHorizontalAlignment(JTextField.CENTER);
-					att[i].getSeason().setValue(tva.getSeason() + "기");
+					att[i].getSeason().setValue((tva.getSeason() + i) + "기");
 					att[i].getTa().setText(tva.getNote());
 					att[i].setDialog();
 					grid.add(att[i].getCenter());

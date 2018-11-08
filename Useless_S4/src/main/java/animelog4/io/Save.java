@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
@@ -54,7 +55,11 @@ public class Save {
 	@SuppressWarnings("unchecked")
 	public void watchingTVA() {
 		JSONObject jsonObject = new JSONObject();
-		for ( TVA t : TypeCollection.getInstance().getWatchingTVAList() ) jsonObject.put(t.getSeriesKey(), t.toMap());
+		HashMap<String, TVA> map = TypeCollection.getInstance().getWatchingTVAMap();
+		for ( String key : map.keySet() ) {
+			TVA t = map.get(key);
+			jsonObject.put(t.getSeriesKey(), t);
+		}
 		putFileContent("data/watchingTVA.json", jsonObject.toJSONString());
 	}
 	

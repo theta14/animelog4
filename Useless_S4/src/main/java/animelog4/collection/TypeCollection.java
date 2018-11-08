@@ -17,12 +17,12 @@ public class TypeCollection {
 	
 	private HashMap<String, TVASeries> tvaMap;
 	private HashMap<String, MovieSeries> movieMap;
-	private ArrayList<TVA> watchingTVAList;
+	private HashMap<String, TVA> watchingTVAMap;
 	
 	private TypeCollection() {
 		tvaMap = new HashMap<String, TVASeries>();
 		movieMap = new HashMap<String, MovieSeries>();
-		watchingTVAList = new ArrayList<TVA>();
+		watchingTVAMap = new HashMap<String, TVA>();
 	}
 	
 	public static TypeCollection getInstance() {
@@ -33,8 +33,8 @@ public class TypeCollection {
 		return tvaMap;
 	}
 	
-	public ArrayList<TVA> getWatchingTVAList() {
-		return watchingTVAList;
+	public HashMap<String, TVA> getWatchingTVAMap() {
+		return watchingTVAMap;
 	}
 	
 	public HashMap<String, MovieSeries> getMovieMap() {

@@ -1,5 +1,6 @@
 package animelog4.gui.event;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -14,11 +15,21 @@ import animelog4.gui.view.BasePanel;
 import animelog4.gui.view.TypePanel;
 
 public class ElementRemoveEvent {
+	private TypePanel tp;
+	private Component c;
 	
-	private void doRemove() {		
-		BasePanel bp = BasePanel.getInstance();
-		boolean isTVAPanelOn = bp.isTVAPanelOn();
-		TypePanel tp = bp.getElementPanel();
+	public ElementRemoveEvent() {
+		c = BasePanel.getInstance();
+		tp = BasePanel.getInstance().getElementPanel();
+	}
+	
+	public ElementRemoveEvent(TypePanel tp, Component c) {
+		this.tp = tp;
+		this.c = c;
+	}
+	
+	private void doRemove() {
+		boolean isTVAPanelOn = BasePanel.getInstance().isTVAPanelOn();
 		ALTable table = tp.getTable();
 		TypeCollection tc = TypeCollection.getInstance();
 		
@@ -27,18 +38,22 @@ public class ElementRemoveEvent {
 			selectedRow = table.convertRowIndexToModel(table.getSelectedRow());
 		}
 		catch(ArrayIndexOutOfBoundsException e) {
-			JOptionPane.showMessageDialog(bp, "선택된 항목이 없습니다.", "선택 에러", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(c, "선택된 항목이 없습니다.", "선택 에러", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		String s = String.format("[ %s ]\n정말 삭제하시겠습니까?", (String) table.getModel().getValueAt(selectedRow, 1));
-		int ans = JOptionPane.showConfirmDialog(bp, s, "삭제", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		int ans = JOptionPane.showConfirmDialog(c, s, "삭제", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if ( ans != JOptionPane.YES_OPTION ) return;
 		
-		if ( isTVAPanelOn ) {
+		if ( tp.getType() == TypePanel.WATCHING_TVA ) {
+			String address = (String) table.getModel().getValueAt(selectedRow, 6);
+			tc.getWatchingTVAMap().remove(address);
+		}
+		else if ( isTVAPanelOn ) {
 			String address = (String) table.getModel().getValueAt(selectedRow, 6);
 			String splitAddress[] = address.split("@");
 			if ( tc.getTVAMap().get(splitAddress[0]).getElementMap().size() == 1 && tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey() != null )
-				if ( JOptionPane.showConfirmDialog(bp, "극장판도 같이 삭제됩니다.", "삭제", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION )
+				if ( JOptionPane.showConfirmDialog(c, "극장판도 같이 삭제됩니다.", "삭제", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION )
 					return;
 			tc.removeTVAByAddress(address);
 		}
