@@ -67,7 +67,7 @@ public class Load {
 			for ( Object key : parsedData.keySet() ) {
 				JSONObject o = (JSONObject) parsedData.get(key);
 				TVA t = new TVA(o);
-				t.setSeriesKey(key.toString());
+				t.setSeriesKey((String) key);
 				tc.getWatchingTVAMap().put(t.getAddress(), t);
 			}
 		}

@@ -42,6 +42,9 @@ public class TypeCollection {
 	}
 	
 	public TVA getTVAByAddress(String address) {
+		TVA t;
+		if ( (t = watchingTVAMap.get(address)) != null ) return t;
+		
 		String s[] = address.split("@");
 		return tvaMap.get(s[0]).getElementMap().get(Integer.parseInt(s[1]));
 	}
@@ -93,6 +96,15 @@ public class TypeCollection {
 			for ( int intKey : map.keySet() )
 				a.add(map.get(intKey));
 		}
+		String s[][] = new String[a.size()][];
+		for (int i=0; i<a.size(); i++) s[i] = a.get(i).toArray();
+		return s;
+	}
+	
+	public String[][] toWatchingTVAArray() {
+		ArrayList<TVA> a = new ArrayList<TVA>();
+		for ( String key : watchingTVAMap.keySet() )
+			a.add(watchingTVAMap.get(key));
 		String s[][] = new String[a.size()][];
 		for (int i=0; i<a.size(); i++) s[i] = a.get(i).toArray();
 		return s;

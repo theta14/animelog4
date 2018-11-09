@@ -1,6 +1,7 @@
 package animelog4.gui.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -57,5 +58,9 @@ public class MoviePanel extends JPanel implements TypePanel {
 	
 	public int getType() {
 		return MOVIE;
+	}
+	
+	public Component getComponent() {
+		return this;
 	}
 }

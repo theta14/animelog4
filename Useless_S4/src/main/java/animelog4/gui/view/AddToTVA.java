@@ -200,6 +200,13 @@ public class AddToTVA implements AddToCollection {
 		di.setVisible(true);
 	}
 	
+	public void show(Component component) {
+		di.pack();
+		di.setLocationRelativeTo(component);
+		di.setModal(true);
+		di.setVisible(true);
+	}
+	
 	public void addEventToCollection() {
 		ElementAddEvent eae = new ElementAddEvent(di);
 		save.addActionListener(eae.getTVAActionListener(cbx, chbox, series, rbtn, tf, spnr, season, ta));

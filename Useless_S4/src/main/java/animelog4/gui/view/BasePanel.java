@@ -4,19 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import animelog4.collection.TypeCollection;
 import animelog4.gui.event.ElementRemoveEvent;
 import animelog4.gui.event.MenuListener;
-import animelog4.type.Movie;
-import animelog4.type.TVA;
 
 public class BasePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -24,13 +18,11 @@ public class BasePanel extends JPanel {
 	
 	private JPanel panel;
 	private TypePanel tp;
-	private boolean isTVAPanelOn;
 	
 	private BasePanel() {
 		setLayout(new BorderLayout());
 		panel = new JPanel(new BorderLayout());
 		tp = TVAPanel.getInstance();
-		isTVAPanelOn = true;
 		
 		JButton changePanel = new JButton("극장판");	// First seen panel is TVA panel, so its text is 'Movie'
 		JButton add = new JButton("추가");
@@ -40,48 +32,27 @@ public class BasePanel extends JPanel {
 		changePanel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JButton btn = (JButton) e.getSource();
-				btn.setText(isTVAPanelOn ? "TVA" : "극장판");
+				if ( tp.getType() == TypePanel.TVA ) btn.setText("TVA");
+				else if ( tp.getType() == TypePanel.MOVIE ) btn.setText("극장판");
 				changePanel();
 			}
 		});
 		add.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AddToCollection atc = isTVAPanelOn ? new AddToTVA() : new AddToMovie();
+				AddToCollection atc = null;
+				if ( tp.getType() == TypePanel.TVA ) atc = new AddToTVA();
+				else if ( tp.getType() == TypePanel.MOVIE ) atc = new AddToMovie();
+				else {
+					System.out.println("Unknown error occured near (BasePanel.java:52)");
+					return;
+				}
 				atc.setDialog();
 				atc.addEventToCollection();
 				atc.show();
 			}
 		});
 		remove.addActionListener(new ElementRemoveEvent().getActionListener());
-		
 		menu.addActionListener(new MenuListener(this));
-		menu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ArrayList<String> a = new ArrayList<String>();
-				TypeCollection tc = TypeCollection.getInstance();
-				
-				for ( String key : tc.getTVAMap().keySet() ) {
-					Map<Integer, TVA> map = tc.getTVAMap().get(key).getElementMap();
-					for ( int intKey : map.keySet() ) {
-						a.add("{" + map.get(intKey).getKOR() + " / " + map.get(intKey).getAddress() + "}");
-					}
-				}
-				Collections.sort(a);
-				System.out.println(a);
-				System.out.println(a.size());
-				a = new ArrayList<String>();
-				
-				for ( String key : tc.getMovieMap().keySet() ) {
-					Map<Integer, Movie> map = tc.getMovieMap().get(key).getElementMap();
-					for ( int intKey : map.keySet() ) {
-						a.add("{" + map.get(intKey).getKOR() + " / " + map.get(intKey).getAddress() + "}");
-					}
-				}
-				Collections.sort(a);
-				System.out.println(a);
-				System.out.println(a.size());
-			}
-		});
 		
 		JPanel south = new JPanel(new BorderLayout());
 		JPanel south_center = new JPanel(new GridLayout(1, 3));
@@ -102,8 +73,8 @@ public class BasePanel extends JPanel {
 	
 	private void changePanel() {
 		panel.removeAll();
-		tp = isTVAPanelOn ? MoviePanel.getInstance() : TVAPanel.getInstance();
-		isTVAPanelOn = !isTVAPanelOn;
+		if ( tp.getType() == TypePanel.TVA ) tp = MoviePanel.getInstance();
+		else if ( tp.getType() == TypePanel.MOVIE ) tp = TVAPanel.getInstance();
 		panel.add((JPanel) tp);
 		panel.revalidate();
 		panel.repaint();
@@ -111,10 +82,6 @@ public class BasePanel extends JPanel {
 	
 	public TypePanel getElementPanel() {
 		return tp;
-	}
-	
-	public boolean isTVAPanelOn() {
-		return isTVAPanelOn;
 	}
 	
 }

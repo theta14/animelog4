@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 
 import animelog4.collection.TypeCollection;
 import animelog4.gui.component.ALDialog;
+import animelog4.gui.component.ALTable;
 import animelog4.gui.view.MoviePanel;
 import animelog4.gui.view.TVAPanel;
 import animelog4.type.Movie;
@@ -82,6 +83,73 @@ public class ElementAddEvent {
 				}
 				String row[] = { ts.getTitleFrontChar(), t.getKOR(), t.getENG(), t.getJPN(), t.getPD(), Integer.toString(t.getQTR()), t.getAddress() };
 				TVAPanel.getInstance().getTable().getDefaultTableModel().addRow(row);
+				di.dispose();
+			}
+		};
+	}
+	
+	public ActionListener getWatchingTVAActionListener(final ALTable table, final JComboBox<TVASeries> cbx, final JCheckBox chbox, final JTextField series, final JRadioButton rbtn[], final JTextField tf[], final JSpinner spnr, final JSpinner season, final JTextArea ta) {
+		return new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				final TypeCollection tc = TypeCollection.getInstance();
+				final String s[] = { "KOR", "ENG", "JPN", "제작사" };
+				
+				for (int i=0; i<tf.length; i++) {
+					if ( tf[i].getText().trim().isEmpty() ) {
+						JOptionPane.showMessageDialog(di, String.format("%s 필드가 비어있습니다.", s[i]), "ERROR", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					else tf[i].setText(tf[i].getText().trim());
+				}
+				
+				int ans = JOptionPane.showConfirmDialog(di, "저장하시겠습니까?", "저장", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if ( ans != JOptionPane.YES_OPTION ) return;
+				
+				
+				String seasonStr = (String) season.getValue();
+				seasonStr = seasonStr.substring(0, seasonStr.indexOf('기'));
+				
+				int representValue = -1;
+				for (int i=0; i<rbtn.length; i++) {
+					if ( rbtn[i].isSelected() ) {
+						representValue = i;
+						break;
+					}
+				}
+				if ( representValue == -1 ) {
+					System.out.println("Unknown error while setting representValue (ElementAddEvent.java:64)");
+					return;
+				}
+				
+				TVA t = new TVA(tf[0].getText(), tf[1].getText(), tf[2].getText(), tf[3].getText(), ta.getText().trim(), (Integer) spnr.getValue(), Integer.parseInt(seasonStr), representValue);
+				String title = null;
+				if ( chbox.isSelected() ) {
+					t.setSeriesKey('x' + Long.toHexString(System.currentTimeMillis()));
+					switch ( representValue ) {
+					case 0:
+						title = t.getKOR().substring(0, 2);
+						break;
+					case 1:
+						title = t.getENG().substring(0, 2);
+						break;
+					case 2:
+						title = t.getJPN().substring(0, 2);
+						break;
+					}
+				}
+				else {
+					TVASeries ts = (TVASeries) cbx.getSelectedItem();
+					if ( tc.getTVAMap().get(ts.getKey()).getElementMap().get(t.getSeason()) != null ) {
+						JOptionPane.showMessageDialog(di, t.getSeason() + "기가 이미 존재합니다.", "ERROR", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					t.setSeriesKey(ts.getKey());
+					title = ts.getTitleFrontChar();
+				}
+				tc.getWatchingTVAMap().put(t.getAddress(), t);
+				
+				String row[] = { title, t.getKOR(), t.getENG(), t.getJPN(), t.getPD(), Integer.toString(t.getQTR()), t.getAddress() };
+				table.getDefaultTableModel().addRow(row);
 				di.dispose();
 			}
 		};

@@ -20,7 +20,7 @@ public class ElementRemoveEvent {
 	
 	public ElementRemoveEvent() {
 		c = BasePanel.getInstance();
-		tp = BasePanel.getInstance().getElementPanel();
+		tp = null;
 	}
 	
 	public ElementRemoveEvent(TypePanel tp, Component c) {
@@ -29,7 +29,7 @@ public class ElementRemoveEvent {
 	}
 	
 	private void doRemove() {
-		boolean isTVAPanelOn = BasePanel.getInstance().isTVAPanelOn();
+		if ( tp == null ) tp = BasePanel.getInstance().getElementPanel();
 		ALTable table = tp.getTable();
 		TypeCollection tc = TypeCollection.getInstance();
 		
@@ -49,7 +49,7 @@ public class ElementRemoveEvent {
 			String address = (String) table.getModel().getValueAt(selectedRow, 6);
 			tc.getWatchingTVAMap().remove(address);
 		}
-		else if ( isTVAPanelOn ) {
+		else if ( tp.getType() == TypePanel.TVA ) {
 			String address = (String) table.getModel().getValueAt(selectedRow, 6);
 			String splitAddress[] = address.split("@");
 			if ( tc.getTVAMap().get(splitAddress[0]).getElementMap().size() == 1 && tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey() != null )
@@ -57,7 +57,7 @@ public class ElementRemoveEvent {
 					return;
 			tc.removeTVAByAddress(address);
 		}
-		else {
+		else if ( tp.getType() == TypePanel.MOVIE ) {
 			String address = (String) table.getModel().getValueAt(selectedRow, 5);
 			tc.removeMovieByAddress(address);
 		}

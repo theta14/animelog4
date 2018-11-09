@@ -1,6 +1,7 @@
 package animelog4.gui.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -37,7 +38,7 @@ public class TVAPanel extends JPanel implements TypePanel {
 			}
 		});
 		
-		TVADetail td = new TVADetail(this);
+		TVADetail td = new TVADetail(this, this);
 		table.addMouseListener(td.getElementMouseListener());
 		table.addKeyListener(td.getElementKeyListener());
 		
@@ -57,5 +58,9 @@ public class TVAPanel extends JPanel implements TypePanel {
 	
 	public int getType() {
 		return TVA;
+	}
+	
+	public Component getComponent() {
+		return this;
 	}
 }

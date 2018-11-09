@@ -53,14 +53,22 @@ public class TVADetail {
 	private Component upperComponent;
 	private int qtr, season, representValue;
 	
+	private ALDialog di;
+	private JPanel south;
+	private ALTable table;
+	private JTextArea ta;
+	private TypePanel tp;
+	private ALTable[] otherSourceTables = null;
+	
 	public TVADetail() {
 		tc = TypeCollection.getInstance();
-		upperComponent = TVAPanel.getInstance();
+		upperComponent = BasePanel.getInstance();
 	}
 	
-	public TVADetail(Component upperComponent) {
-		tc = TypeCollection.getInstance();
+	public TVADetail(TypePanel tp, Component upperComponent) {
+		this.tp = tp;
 		this.upperComponent = upperComponent;
+		tc = TypeCollection.getInstance();
 	}
 	
 	public MouseListener getElementMouseListener() {
@@ -69,8 +77,16 @@ public class TVADetail {
 				if ( e.getClickCount() == 2 ) {
 					ALTable table = (ALTable) e.getSource();
 					String address = (String) table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()), 6);
+					
 					if ( table.getSelectedColumn() == 0 ) showSeriesDialog(address.split("@")[0]);
-					else showElementDialog(address);
+					else {
+						setElementDialog(address);
+						
+						if ( upperComponent instanceof ALDialog ) setElementDialogWatchingSouthPanel(address);
+						else setElementDialogDefaultSouthPanel(address);
+						
+						setElementDialogShown();
+					}
 				}
 			}
 		};
@@ -82,15 +98,23 @@ public class TVADetail {
 				if ( e.getKeyCode() == KeyEvent.VK_ENTER ) {
 					ALTable table = (ALTable) e.getSource();
 					String address = (String) table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()), 6);
-					showElementDialog(address);
+					setElementDialog(address);
+					
+					if ( upperComponent instanceof ALDialog ) setElementDialogWatchingSouthPanel(address);
+					else setElementDialogDefaultSouthPanel(address);
+					
+					setElementDialogShown();
 				}
 			}
 		};
 	}
 	
-	private void showElementDialog(String address) {
-		final ALDialog di = new ALDialog("상세정보");
-		final ALTable sourceTable = BasePanel.getInstance().getElementPanel().getTable();
+	public void setOtherSourceTables(ALTable... otherSourceTables) {
+		this.otherSourceTables = otherSourceTables;
+	}
+	
+	private void setElementDialog(String address) {
+		di = new ALDialog("상세정보");
 		final TVA tva = tc.getTVAByAddress(address);
 		qtr = tva.getQTR();
 		season = tva.getSeason();
@@ -105,7 +129,7 @@ public class TVADetail {
 		}
 		
 		DefaultTableModel dtm = new DefaultTableModel(tableData, new String[] { "property", "element" });
-		final ALTable table = new ALTable(dtm) {
+		table = new ALTable(dtm) {
 			private static final long serialVersionUID = 1L;
 			public boolean isCellEditable(int row, int col) {
 				return col == 1 && row != 0 && row != 4;
@@ -155,6 +179,10 @@ public class TVADetail {
 							
 							if ( rbtn[0].isSelected() ) {
 								TVASeries ts = (TVASeries) table.getValueAt(row, 1);
+								if ( ts == null ) {
+									JOptionPane.showMessageDialog(upperComponent, "아직 등록되어 있지 않습니다.", "미등록", JOptionPane.WARNING_MESSAGE);
+									return;
+								}
 								di.dispose();
 								showSeriesDialog(ts.getKey());
 							}
@@ -162,13 +190,13 @@ public class TVADetail {
 								Vector<TVASeries> v = new Vector<TVASeries>(tc.getTVAMap().values());
 								Collections.sort(v);
 								final JComboBox<TVASeries> cbx = new JComboBox<TVASeries>(v);
-								cbx.setEnabled(false);
-								
 								final JCheckBox chbox = new JCheckBox("새로 작성");
-								chbox.setSelected(true);
-								
 								final JTextField series = new JTextField();
+								
+								cbx.setEnabled(false);
+								chbox.setSelected(true);
 								series.addAncestorListener(new RequestFocusListener());
+								if ( tp.getType() == TypePanel.WATCHING_TVA ) series.setEditable(false);
 								
 								cbx.addActionListener(new ActionListener() {
 									public void actionPerformed(ActionEvent e) {
@@ -178,7 +206,7 @@ public class TVADetail {
 								chbox.addActionListener(new ActionListener() {
 									public void actionPerformed(ActionEvent e) {
 										cbx.setEnabled(!chbox.isSelected());
-										series.setEnabled(chbox.isSelected());
+										if ( tp.getType() != TypePanel.WATCHING_TVA ) series.setEnabled(chbox.isSelected());
 										if ( chbox.isSelected() ) series.setText("");
 										else series.setText(cbx.getSelectedItem().toString());
 									}
@@ -194,15 +222,22 @@ public class TVADetail {
 								do {
 									if ( JOptionPane.showConfirmDialog(di, p1, "시리즈 수정", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION )
 										return;
-								} while ( series.getText().trim().isEmpty() );
+								} while ( series.getText().trim().isEmpty() && tp.getType() != TypePanel.WATCHING_TVA );
 								
 								if ( chbox.isSelected() ) {
-									table.setValueAt(series.getText(), row, 1);
+									if ( series.getText().isEmpty() ) table.setValueAt(null, row, 1);
+									else table.setValueAt(series.getText(), row, 1);
 									setTitleChanged(di, "상세정보");
 								}
 								else {
 									TVASeries ts = (TVASeries) cbx.getSelectedItem();
-									if ( table.getValueAt(row, 1) instanceof String || !ts.equals(table.getValueAt(row, 1)) ) {
+									try {
+										if ( table.getValueAt(row, 1) instanceof String || !ts.equals(table.getValueAt(row, 1)) ) {
+											setTitleChanged(di, "상세정보");
+											table.setValueAt(ts, row, 1);
+										}
+									}
+									catch(NullPointerException e1) {
 										setTitleChanged(di, "상세정보");
 										table.setValueAt(ts, row, 1);
 									}
@@ -278,7 +313,7 @@ public class TVADetail {
 			}
 		});
 		
-		final JTextArea ta = new JTextArea(4, 20);
+		ta = new JTextArea(4, 20);
 		ta.setText(tva.getNote());
 		ta.getDocument().addDocumentListener(new DocumentListener() {
 			public void insertUpdate(DocumentEvent e) {
@@ -312,6 +347,14 @@ public class TVADetail {
 		gbc.gridheight = 1;
 		gbl.setConstraints(sp, gbc);
 		gridbag.add(sp);
+		
+		di.add(gridbag);
+	}
+	
+	private void setElementDialogDefaultSouthPanel(String address) {
+		final String left[] = { "시리즈", "KOR", "ENG", "JPN", "제작사", "쿨", "시즌" };
+		final ALTable sourceTable = TVAPanel.getInstance().getTable();
+		final TVA tva = tc.getTVAByAddress(address);
 		
 		final JButton save = new JButton("저장");
 		JButton divide = new JButton("분할");
@@ -393,6 +436,23 @@ public class TVADetail {
 				sourceTable.setValueAt(qtr, row, 5);
 				sourceTable.getModel().setValueAt(tva.getAddress(), sourceTable.convertRowIndexToModel(row), 6);
 				
+				if ( otherSourceTables != null ) {
+					for (int i=0; i<otherSourceTables.length; i++) {
+						for (int j=0; j<otherSourceTables[i].getRowCount(); j++) {
+							if ( ((String) otherSourceTables[i].getModel().getValueAt(j, 6)).equals(pastAddress) ) {
+								otherSourceTables[i].setValueAt(ts.getTitleFrontChar(), row, 0);
+								otherSourceTables[i].setValueAt(kor, row, 1);
+								otherSourceTables[i].setValueAt(eng, row, 2);
+								otherSourceTables[i].setValueAt(jpn, row, 3);
+								otherSourceTables[i].setValueAt(pd, row, 4);
+								otherSourceTables[i].setValueAt(qtr, row, 5);
+								otherSourceTables[i].getModel().setValueAt(tva.getAddress(), sourceTable.convertRowIndexToModel(row), 6);
+								break;
+							}
+						}
+					}
+				}
+				
 				di.setTitle("상세정보");
 			}
 		});
@@ -463,11 +523,158 @@ public class TVADetail {
 				divDialog.setVisible(true);
 			}
 		});
-		
-		JPanel south = new JPanel(new GridLayout(1, 2));
+		south = new JPanel(new GridLayout(1, 2));
 		south.add(save);
 		south.add(divide);
+	}
+	
+	private void setElementDialogWatchingSouthPanel(String address) {
+		final String left[] = { "시리즈", "KOR", "ENG", "JPN", "제작사", "쿨", "시즌" };
+		final ALTable sourceTable = tp.getTable();
+		final TVA tva = tc.getTVAByAddress(address);
 		
+		final JButton save = new JButton("저장");
+		JButton done = new JButton("시청 완료");
+		save.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Object series = table.getValueAt(0, 1);
+				System.out.println(series);
+				TVASeries ts;
+				if ( series instanceof TVASeries )
+					ts = (TVASeries) series;
+				else if ( series == null )
+					ts = null;
+				else {
+					System.out.println("There is something wrong about TVASeries cell");
+					return;
+				}
+				
+				String kor = ((String) table.getValueAt(1, 1)).trim();
+				String eng = ((String) table.getValueAt(2, 1)).trim();
+				String jpn = ((String) table.getValueAt(3, 1)).trim();
+				String pd = ((String) table.getValueAt(4, 1)).trim();
+				int qtr = (Integer) table.getValueAt(5, 1);
+				String seasonStr = (String) table.getValueAt(6, 1);
+				seasonStr = seasonStr.substring(0, seasonStr.indexOf('기'));
+				int season = Integer.parseInt(seasonStr);
+				String note = ta.getText().trim();
+				
+				String s[] = { kor, eng, jpn, pd };
+				for (int i=0; i<s.length; i++) {
+					if ( s[i].isEmpty() ) {
+						JOptionPane.showMessageDialog(di, String.format("%s 필드가 비어있습니다.", left[i+1]), "필드", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+				}
+				
+				final String pastSeriesKey = tva.getSeriesKey();
+				final String pastAddress = tva.getAddress();
+				
+				if ( ts != null ) {
+					if ( ts.getElementMap().get(season) != null ) {
+						JOptionPane.showMessageDialog(di, String.format("%d기가 이미 존재합니다.", season), "시즌 에러", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+				}
+				
+				tva.setKOR(kor);
+				tva.setENG(eng);
+				tva.setJPN(jpn);
+				tva.setPD(pd);
+				tva.setQTR(qtr);
+				tva.setSeason(season);
+				tva.setNote(note);
+				tva.setRepresentValue(representValue);
+				
+				try {
+					if ( !tc.getTVAMap().get(pastSeriesKey).equals(ts) ) {
+						tva.setSeriesKey(ts.getKey());
+						tc.getWatchingTVAMap().remove(pastAddress);
+						tc.getWatchingTVAMap().put(tva.getAddress(), tva);
+					}
+				}
+				catch(NullPointerException e1) {
+					if ( !tva.getSeriesKey().startsWith("x") ) {
+						tva.setSeriesKey('x' + Long.toHexString(System.currentTimeMillis()));
+						tc.getWatchingTVAMap().remove(pastAddress);
+						tc.getWatchingTVAMap().put(tva.getAddress(), tva);
+					}
+					else if ( ts != null ) {
+						tva.setSeriesKey(ts.getKey());
+						tc.getWatchingTVAMap().remove(pastAddress);
+						tc.getWatchingTVAMap().put(tva.getAddress(), tva);
+					}
+				}
+				
+				int row = -1;
+				for (int i=0; i<sourceTable.getRowCount(); i++) {
+					if ( pastAddress.equals(sourceTable.getModel().getValueAt(sourceTable.convertRowIndexToModel(i), 6)) ) {
+						row = i;
+						break;
+					}
+				}
+				
+				if ( ts != null )
+					sourceTable.setValueAt(ts.getTitleFrontChar(), row, 0);
+				else {
+					switch ( representValue ) {
+					case 0:
+						sourceTable.setValueAt(kor.substring(0, 2), row, 0);
+						break;
+					case 1:
+						sourceTable.setValueAt(eng.substring(0, 2), row, 0);
+						break;
+					case 2:
+						sourceTable.setValueAt(jpn.substring(0, 2), row, 0);
+						break;
+					}
+				}
+				
+				sourceTable.setValueAt(kor, row, 1);
+				sourceTable.setValueAt(eng, row, 2);
+				sourceTable.setValueAt(jpn, row, 3);
+				sourceTable.setValueAt(pd, row, 4);
+				sourceTable.setValueAt(qtr, row, 5);
+				sourceTable.getModel().setValueAt(tva.getAddress(), sourceTable.convertRowIndexToModel(row), 6);
+				
+				di.setTitle("상세정보");
+			}
+		});
+		done.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if ( JOptionPane.showConfirmDialog(di, "TVA 패널로 옮기시겠습니까?", "시청 완료", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION )
+					return;
+				
+				final String pastAddress = tva.getAddress();
+				if ( tva.getSeriesKey().startsWith("x") ) {
+					String s = JOptionPane.showInputDialog(di, "시리즈 타이틀을 입력해주세요.", "시리즈 타이틀", JOptionPane.QUESTION_MESSAGE);
+					TVASeries ts = new TVASeries(s);
+					ts.add(tva);
+					tc.getTVAMap().put(ts.getKey(), ts);
+				}
+				else {
+					if ( tc.getTVAMap().get(tva.getSeriesKey()).getElementMap().get(tva.getSeason()) != null ) {
+						JOptionPane.showMessageDialog(di, String.format("%d기가 이미 존재합니다.", tva.getSeason()), "시즌 에러", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					tc.getTVAMap().get(tva.getSeriesKey()).add(tva);
+				}
+				
+				tc.getWatchingTVAMap().remove(pastAddress);
+				sourceTable.getDefaultTableModel().removeRow(sourceTable.convertColumnIndexToModel(sourceTable.getSelectedRow()));
+				
+				String row[] = { tc.getTVAMap().get(tva.getSeriesKey()).getTitleFrontChar(), tva.getKOR(), tva.getENG(), tva.getJPN(), tva.getPD(), Integer.toString(tva.getQTR()), tva.getAddress() };
+				TVAPanel.getInstance().getTable().getDefaultTableModel().addRow(row);
+				
+				di.dispose();
+			}
+		});
+		south = new JPanel(new GridLayout(1, 2));
+		south.add(save);
+		south.add(done);
+	}
+	
+	private void setElementDialogShown() {
 		di.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				UserInfo ui = UserInfo.getInstance();
@@ -476,14 +683,16 @@ public class TVADetail {
 						JCheckBox chbx = new JCheckBox("다시 표시하지 않기");
 						int ans = JOptionPane.showConfirmDialog(di, new Object[] { "변경사항이 있습니다.\n저장하시겠습니까?" , chbx }, "변경사항", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 						if ( chbx.isSelected() ) UserInfo.getInstance().setSavePopUp(true);
-						if ( ans == JOptionPane.YES_OPTION ) save.doClick();
+						if ( ans == JOptionPane.YES_OPTION ) {
+							Component c[] = south.getComponents();
+							((JButton) c[0]).doClick();
+							// this is save button
+						}
 					}
 				}
 			}
 		});
-		di.add(gridbag);
 		di.add(south, BorderLayout.SOUTH);
-		
 		di.pack();
 		di.setWidth((int) (di.getWidth() * 1.2));
 		di.setLocationRelativeTo(upperComponent);
@@ -495,6 +704,10 @@ public class TVADetail {
 		final ALDialog di = new ALDialog("시리즈 정보");
 		final ALTable sourceTable = BasePanel.getInstance().getElementPanel().getTable();
 		final TVASeries ts = tc.getTVAMap().get(seriesKey);
+		if ( ts == null ) {
+			JOptionPane.showMessageDialog(upperComponent, "아직 등록되어 있지 않습니다.", "미등록", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
 		
 		final JTextField tf = new JTextField(ts.getTitle());
 		tf.setHorizontalAlignment(JTextField.CENTER);
@@ -518,7 +731,10 @@ public class TVADetail {
 			public void mouseClicked(MouseEvent e) {
 				if ( e.getClickCount() == 2 ) {
 					di.dispose();
-					showElementDialog(list.getSelectedValue().getAddress());
+					String address = list.getSelectedValue().getAddress();
+					setElementDialog(address);
+					setElementDialogDefaultSouthPanel(address);
+					setElementDialogShown();
 				}
 			}
 		});

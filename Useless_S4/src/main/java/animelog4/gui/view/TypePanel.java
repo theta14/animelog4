@@ -1,5 +1,7 @@
 package animelog4.gui.view;
 
+import java.awt.Component;
+
 import animelog4.gui.component.ALTable;
 
 public interface TypePanel {
@@ -9,4 +11,5 @@ public interface TypePanel {
 	
 	ALTable getTable();
 	int getType();
+	Component getComponent();
 }
