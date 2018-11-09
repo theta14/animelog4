@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import animelog4.collection.TypeCollection;
 import animelog4.gui.component.ALTable;
 import animelog4.gui.view.BasePanel;
+import animelog4.gui.view.TVAPanel;
 import animelog4.gui.view.TypePanel;
 
 public class ElementRemoveEvent {
@@ -45,22 +46,66 @@ public class ElementRemoveEvent {
 		int ans = JOptionPane.showConfirmDialog(c, s, "삭제", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if ( ans != JOptionPane.YES_OPTION ) return;
 		
-		if ( tp.getType() == TypePanel.WATCHING_TVA ) {
+//		if ( tp.getType() == TypePanel.WATCHING_TVA ) {
+//			String address = (String) table.getModel().getValueAt(selectedRow, 6);
+//			tc.getWatchingTVAMap().remove(address);
+//		}
+//		else if ( tp.getType() == TypePanel.TVA ) {
+//			String address = (String) table.getModel().getValueAt(selectedRow, 6);
+//			String splitAddress[] = address.split("@");
+//			if ( tc.getTVAMap().get(splitAddress[0]).getElementMap().size() == 1 && tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey() != null )
+//				if ( JOptionPane.showConfirmDialog(c, "극장판도 같이 삭제됩니다.", "삭제", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION )
+//					return;
+//			tc.removeTVAByAddress(address);
+//		}
+//		else if ( tp.getType() == TypePanel.MOVIE ) {
+//			String address = (String) table.getModel().getValueAt(selectedRow, 5);
+//			tc.removeMovieByAddress(address);
+//		}
+//		else if ( tp.getType() == TypePanel.SEARCHED_TVA ) {
+//			String address = (String) table.getModel().getValueAt(selectedRow, 6);
+//			String splitAddress[] = address.split("@");
+//			if ( tc.getTVAMap().get(splitAddress[0]).getElementMap().size() == 1 && tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey() != null )
+//				if ( JOptionPane.showConfirmDialog(c, "극장판도 같이 삭제됩니다.", "삭제", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION )
+//					return;
+//			tc.removeTVAByAddress(address);
+//		}
+		
+		switch ( tp.getType() ) {
+		
+		case TypePanel.WATCHING_TVA:
 			String address = (String) table.getModel().getValueAt(selectedRow, 6);
 			tc.getWatchingTVAMap().remove(address);
-		}
-		else if ( tp.getType() == TypePanel.TVA ) {
-			String address = (String) table.getModel().getValueAt(selectedRow, 6);
+			break;
+			
+		case TypePanel.TVA:
+			address = (String) table.getModel().getValueAt(selectedRow, 6);
 			String splitAddress[] = address.split("@");
 			if ( tc.getTVAMap().get(splitAddress[0]).getElementMap().size() == 1 && tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey() != null )
 				if ( JOptionPane.showConfirmDialog(c, "극장판도 같이 삭제됩니다.", "삭제", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION )
 					return;
 			tc.removeTVAByAddress(address);
-		}
-		else if ( tp.getType() == TypePanel.MOVIE ) {
-			String address = (String) table.getModel().getValueAt(selectedRow, 5);
+			
+		case TypePanel.SEARCHED_TVA:
+			address = (String) table.getModel().getValueAt(selectedRow, 6);
+			ALTable tvaPanelTable = TVAPanel.getInstance().getTable();
+			Outer: for (int i=0; i<tvaPanelTable.getRowCount(); i++) {
+				if ( ((String) tvaPanelTable.getDefaultTableModel().getValueAt(i, 6)).equals(address) ) {
+					tvaPanelTable.getDefaultTableModel().removeRow(i);
+					break Outer;
+				}
+			}
+			break;
+			
+		case TypePanel.MOVIE:
+			address = (String) table.getModel().getValueAt(selectedRow, 5);
 			tc.removeMovieByAddress(address);
+			
+		case TypePanel.SEARCHED_MOVIE:
+			// write codes about searched movie like upside
+			break;
 		}
+		
 		table.getDefaultTableModel().removeRow(selectedRow);
 	}
 	

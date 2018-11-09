@@ -18,7 +18,7 @@ import javax.swing.JRadioButton;
 
 import animelog4.collection.RemovedImageList;
 import animelog4.collection.TypeCollection;
-import animelog4.gui.component.ALDialog;
+import animelog4.gui.view.Search;
 import animelog4.gui.view.WatchingTVA;
 import animelog4.io.Save;
 import animelog4.type.Movie;
@@ -94,15 +94,7 @@ public class MenuListener implements ActionListener {
 			catch(NullPointerException e1) {
 				return;
 			}
-//			ALDialog di = new SearchDialog(s).getDialog();
-			ALDialog di = new ALDialog();
-			if ( di == null )
-				JOptionPane.showMessageDialog(component, "검색결과가 없습니다!", "'" + s + "'에 대한 검색결과: 0건", JOptionPane.WARNING_MESSAGE);
-			else {
-				di.setLocationRelativeTo(component);
-				di.setModal(true);
-				di.setVisible(true);
-			}
+			new Search(s);
 			break;
 			
 		case 2:

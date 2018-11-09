@@ -80,4 +80,12 @@ public class TVA implements ElementType {
 		}
 	}
 	
+	public boolean contains(String item) {
+		String kor = KOR.replaceAll(" ", "").toUpperCase();
+		String eng = ENG.replaceAll(" ", "").toUpperCase();
+		String jpn = JPN.replaceAll(" ", "").toUpperCase();
+		String pd = PD.replaceAll(" ", "").toUpperCase();
+		return kor.contains(item) || eng.contains(item) || jpn.contains(item) || pd.contains(item) || item.contains(Integer.toString(QTR));
+	}
+	
 }
