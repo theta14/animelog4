@@ -50,4 +50,12 @@ public class Movie implements ElementType {
 	public String toString() {
 		return KOR;
 	}
+	
+	public boolean contains(String item) {
+		String kor = KOR.replace(" ", "").toUpperCase();
+		String eng = ENG.replace(" ", "").toUpperCase();
+		String jpn = JPN.replace(" ", "").toUpperCase();
+		String pd = PD.replace(" ", "").toUpperCase();
+		return kor.contains(item) || eng.contains(item) || jpn.contains(item) || pd.contains(item);
+	}
 }

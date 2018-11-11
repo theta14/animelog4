@@ -24,6 +24,7 @@ public class BasePanel extends JPanel {
 		panel = new JPanel(new BorderLayout());
 		tp = TVAPanel.getInstance();
 		
+		final ElementRemoveEvent ere = new ElementRemoveEvent();
 		JButton changePanel = new JButton("극장판");	// First seen panel is TVA panel, so its text is 'Movie'
 		JButton add = new JButton("추가");
 		JButton remove = new JButton("삭제");
@@ -35,6 +36,7 @@ public class BasePanel extends JPanel {
 				if ( tp.getType() == TypePanel.TVA ) btn.setText("TVA");
 				else if ( tp.getType() == TypePanel.MOVIE ) btn.setText("극장판");
 				changePanel();
+				ere.setTypePanel(tp);
 			}
 		});
 		add.addActionListener(new ActionListener() {
@@ -51,7 +53,7 @@ public class BasePanel extends JPanel {
 				atc.show();
 			}
 		});
-		remove.addActionListener(new ElementRemoveEvent().getActionListener());
+		remove.addActionListener(ere.getActionListener());
 		menu.addActionListener(new MenuListener(this));
 		
 		JPanel south = new JPanel(new BorderLayout());

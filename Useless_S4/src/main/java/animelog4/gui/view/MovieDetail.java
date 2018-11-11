@@ -54,9 +54,10 @@ import animelog4.type.MovieSeries;
 import animelog4.type.TVASeries;
 
 public class MovieDetail {
-	TypeCollection tc;
+	private TypeCollection tc;
 	private Component upperComponent;
 	private int order;
+	private ALTable[] otherSourceTables = null;
 	
 	public MovieDetail() {
 		tc = TypeCollection.getInstance();
@@ -96,12 +97,16 @@ public class MovieDetail {
 		};
 	}
 	
+	public void setOtherSourceTables(ALTable... otherSourceTables) {
+		this.otherSourceTables = otherSourceTables;
+	}
+	
 	private void showElementDialog(String address) {
 		final ALDialog di = new ALDialog("상세정보");
 		final JPanel basePanel = new JPanel(new GridLayout(1, 2));
 		final JPanel leftPanel = new JPanel(new BorderLayout());
 		final JPanel rightPanel = new JPanel(new BorderLayout());
-		final ALTable sourceTable = BasePanel.getInstance().getElementPanel().getTable();
+		final ALTable sourceTable = MoviePanel.getInstance().getTable();
 		final Movie movie = tc.getMovieByAddress(address);
 		final MovieSeries movieSeries = tc.getMovieMap().get(movie.getSeriesKey());
 		order = movie.getOrder();
@@ -327,6 +332,22 @@ public class MovieDetail {
 				sourceTable.setValueAt(jpn, row, 3);
 				sourceTable.setValueAt(pd, row, 4);
 				sourceTable.getModel().setValueAt(movie.getAddress(), sourceTable.convertRowIndexToModel(row), 5);
+				
+				if ( otherSourceTables != null ) {
+					for (int i=0; i<otherSourceTables.length; i++) {
+						for (int j=0; j<otherSourceTables[i].getRowCount(); j++) {
+							if ( ((String) otherSourceTables[i].getModel().getValueAt(otherSourceTables[i].convertRowIndexToModel(j), 5)).equals(pastAddress) ) {
+								otherSourceTables[i].setValueAt(ts, j, 0);
+								otherSourceTables[i].setValueAt(kor, j, 1);
+								otherSourceTables[i].setValueAt(eng, j, 2);
+								otherSourceTables[i].setValueAt(jpn, j, 3);
+								otherSourceTables[i].setValueAt(pd, j, 4);
+								otherSourceTables[i].getModel().setValueAt(movie.getAddress(), otherSourceTables[i].convertRowIndexToModel(j), 5);
+								break;
+							}
+						}
+					}
+				}
 				
 				di.setTitle("상세정보");
 			}

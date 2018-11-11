@@ -85,7 +85,7 @@ public class TVA implements ElementType {
 		String eng = ENG.replaceAll(" ", "").toUpperCase();
 		String jpn = JPN.replaceAll(" ", "").toUpperCase();
 		String pd = PD.replaceAll(" ", "").toUpperCase();
-		return kor.contains(item) || eng.contains(item) || jpn.contains(item) || pd.contains(item) || item.contains(Integer.toString(QTR));
+		return kor.contains(item) || eng.contains(item) || jpn.contains(item) || pd.contains(item) || Integer.toString(QTR).contains(item);
 	}
 	
 }

@@ -94,7 +94,9 @@ public class MenuListener implements ActionListener {
 			catch(NullPointerException e1) {
 				return;
 			}
-			new Search(s);
+			Search search = new Search(s.trim());
+			search.setDialog();
+			search.show();
 			break;
 			
 		case 2:

@@ -49,7 +49,7 @@ import animelog4.type.TVA;
 import animelog4.type.TVASeries;
 
 public class TVADetail {
-	TypeCollection tc;
+	private TypeCollection tc;
 	private Component upperComponent;
 	private int qtr, season, representValue;
 	
@@ -82,7 +82,7 @@ public class TVADetail {
 					else {
 						setElementDialog(address);
 						
-						if ( upperComponent instanceof ALDialog ) setElementDialogWatchingSouthPanel(address);
+						if ( tp.getType() == TypePanel.WATCHING_TVA ) setElementDialogWatchingSouthPanel(address);
 						else setElementDialogDefaultSouthPanel(address);
 						
 						setElementDialogShown();
@@ -439,14 +439,14 @@ public class TVADetail {
 				if ( otherSourceTables != null ) {
 					for (int i=0; i<otherSourceTables.length; i++) {
 						for (int j=0; j<otherSourceTables[i].getRowCount(); j++) {
-							if ( ((String) otherSourceTables[i].getModel().getValueAt(j, 6)).equals(pastAddress) ) {
-								otherSourceTables[i].setValueAt(ts.getTitleFrontChar(), row, 0);
-								otherSourceTables[i].setValueAt(kor, row, 1);
-								otherSourceTables[i].setValueAt(eng, row, 2);
-								otherSourceTables[i].setValueAt(jpn, row, 3);
-								otherSourceTables[i].setValueAt(pd, row, 4);
-								otherSourceTables[i].setValueAt(qtr, row, 5);
-								otherSourceTables[i].getModel().setValueAt(tva.getAddress(), sourceTable.convertRowIndexToModel(row), 6);
+							if ( ((String) otherSourceTables[i].getModel().getValueAt(otherSourceTables[i].convertRowIndexToModel(j), 6)).equals(pastAddress) ) {
+								otherSourceTables[i].setValueAt(ts.getTitleFrontChar(), j, 0);
+								otherSourceTables[i].setValueAt(kor, j, 1);
+								otherSourceTables[i].setValueAt(eng, j, 2);
+								otherSourceTables[i].setValueAt(jpn, j, 3);
+								otherSourceTables[i].setValueAt(pd, j, 4);
+								otherSourceTables[i].setValueAt(qtr, j, 5);
+								otherSourceTables[i].getModel().setValueAt(tva.getAddress(), otherSourceTables[i].convertRowIndexToModel(j), 6);
 								break;
 							}
 						}

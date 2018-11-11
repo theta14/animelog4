@@ -12,12 +12,14 @@ import javax.swing.JOptionPane;
 import animelog4.collection.TypeCollection;
 import animelog4.gui.component.ALTable;
 import animelog4.gui.view.BasePanel;
+import animelog4.gui.view.MoviePanel;
 import animelog4.gui.view.TVAPanel;
 import animelog4.gui.view.TypePanel;
 
 public class ElementRemoveEvent {
 	private TypePanel tp;
 	private Component c;
+	private int numberOfLinkedMovies = -1;
 	
 	public ElementRemoveEvent() {
 		c = BasePanel.getInstance();
@@ -27,6 +29,16 @@ public class ElementRemoveEvent {
 	public ElementRemoveEvent(TypePanel tp, Component c) {
 		this.tp = tp;
 		this.c = c;
+	}
+	
+	public void setTypePanel(TypePanel tp) {
+		this.tp = tp;
+	}
+	
+	public int getNumberOfLinkedMovies() {
+		final int i = numberOfLinkedMovies;
+		numberOfLinkedMovies = -1;
+		return i;
 	}
 	
 	private void doRemove() {
@@ -46,31 +58,6 @@ public class ElementRemoveEvent {
 		int ans = JOptionPane.showConfirmDialog(c, s, "삭제", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if ( ans != JOptionPane.YES_OPTION ) return;
 		
-//		if ( tp.getType() == TypePanel.WATCHING_TVA ) {
-//			String address = (String) table.getModel().getValueAt(selectedRow, 6);
-//			tc.getWatchingTVAMap().remove(address);
-//		}
-//		else if ( tp.getType() == TypePanel.TVA ) {
-//			String address = (String) table.getModel().getValueAt(selectedRow, 6);
-//			String splitAddress[] = address.split("@");
-//			if ( tc.getTVAMap().get(splitAddress[0]).getElementMap().size() == 1 && tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey() != null )
-//				if ( JOptionPane.showConfirmDialog(c, "극장판도 같이 삭제됩니다.", "삭제", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION )
-//					return;
-//			tc.removeTVAByAddress(address);
-//		}
-//		else if ( tp.getType() == TypePanel.MOVIE ) {
-//			String address = (String) table.getModel().getValueAt(selectedRow, 5);
-//			tc.removeMovieByAddress(address);
-//		}
-//		else if ( tp.getType() == TypePanel.SEARCHED_TVA ) {
-//			String address = (String) table.getModel().getValueAt(selectedRow, 6);
-//			String splitAddress[] = address.split("@");
-//			if ( tc.getTVAMap().get(splitAddress[0]).getElementMap().size() == 1 && tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey() != null )
-//				if ( JOptionPane.showConfirmDialog(c, "극장판도 같이 삭제됩니다.", "삭제", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION )
-//					return;
-//			tc.removeTVAByAddress(address);
-//		}
-		
 		switch ( tp.getType() ) {
 		
 		case TypePanel.WATCHING_TVA:
@@ -78,31 +65,41 @@ public class ElementRemoveEvent {
 			tc.getWatchingTVAMap().remove(address);
 			break;
 			
+		case TypePanel.SEARCHED_TVA:
 		case TypePanel.TVA:
 			address = (String) table.getModel().getValueAt(selectedRow, 6);
 			String splitAddress[] = address.split("@");
 			if ( tc.getTVAMap().get(splitAddress[0]).getElementMap().size() == 1 && tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey() != null )
 				if ( JOptionPane.showConfirmDialog(c, "극장판도 같이 삭제됩니다.", "삭제", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.OK_OPTION )
 					return;
+			numberOfLinkedMovies = tc.getMovieMap().get(tc.getTVAMap().get(splitAddress[0]).getMovieSeriesKey()).getElementMap().size();
 			tc.removeTVAByAddress(address);
 			
-		case TypePanel.SEARCHED_TVA:
-			address = (String) table.getModel().getValueAt(selectedRow, 6);
-			ALTable tvaPanelTable = TVAPanel.getInstance().getTable();
-			Outer: for (int i=0; i<tvaPanelTable.getRowCount(); i++) {
-				if ( ((String) tvaPanelTable.getDefaultTableModel().getValueAt(i, 6)).equals(address) ) {
-					tvaPanelTable.getDefaultTableModel().removeRow(i);
-					break Outer;
+			if ( tp.getType() == TypePanel.SEARCHED_TVA ) {
+				ALTable tvaPanelTable = TVAPanel.getInstance().getTable();
+				for (int i=0; i<tvaPanelTable.getRowCount(); i++) {
+					if ( ((String) tvaPanelTable.getDefaultTableModel().getValueAt(i, 6)).equals(address) ) {
+						tvaPanelTable.getDefaultTableModel().removeRow(i);
+						break;
+					}
 				}
 			}
 			break;
-			
+		
+		case TypePanel.SEARCHED_MOVIE:
 		case TypePanel.MOVIE:
 			address = (String) table.getModel().getValueAt(selectedRow, 5);
 			tc.removeMovieByAddress(address);
 			
-		case TypePanel.SEARCHED_MOVIE:
-			// write codes about searched movie like upside
+			if ( tp.getType() == TypePanel.SEARCHED_MOVIE ) {
+				ALTable moviePanelTable = MoviePanel.getInstance().getTable();
+				for (int i=0; i<moviePanelTable.getRowCount(); i++) {
+					if ( ((String) moviePanelTable.getDefaultTableModel().getValueAt(i, 5)).equals(address) ) {
+						moviePanelTable.getDefaultTableModel().removeRow(i);
+						break;
+					}
+				}
+			}
 			break;
 		}
 		
