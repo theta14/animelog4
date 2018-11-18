@@ -18,6 +18,7 @@ import javax.swing.JRadioButton;
 
 import animelog4.collection.RemovedImageList;
 import animelog4.collection.TypeCollection;
+import animelog4.gui.view.Memo;
 import animelog4.gui.view.Search;
 import animelog4.gui.view.WatchingTVA;
 import animelog4.io.Save;
@@ -33,7 +34,7 @@ public class MenuListener implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		final String rbtns[] = { "정보", "검색", "시청 중인 TVA", "시청 예정 목록", "파일 저장", "종료", "디버깅용" };
+		final String rbtns[] = { "정보", "검색", "시청 중인 TVA", "메모", "파일 저장", "종료", "디버깅용" };
 		JRadioButton rbtn[] = new JRadioButton[rbtns.length];
 		ButtonGroup g = new ButtonGroup();
 		JPanel p = new JPanel();
@@ -104,7 +105,7 @@ public class MenuListener implements ActionListener {
 			break;
 			
 		case 3:
-			// to watch list
+			new Memo();
 			break;
 			
 		case 4:
@@ -113,6 +114,7 @@ public class MenuListener implements ActionListener {
 			save.movie();
 			save.watchingTVA();
 			save.userInfo();
+			save.memo();
 			JOptionPane.showMessageDialog(component, "저장 완료", "파일 저장", JOptionPane.INFORMATION_MESSAGE);
 			break;
 			

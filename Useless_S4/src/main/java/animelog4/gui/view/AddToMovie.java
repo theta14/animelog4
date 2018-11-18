@@ -39,6 +39,7 @@ public class AddToMovie implements AddToCollection {
 	private GridBagLayout gbl;
 	private GridBagConstraints gbc;
 	private JPanel center;
+	private JPanel south;
 	
 	JComboBox<TVASeries> cbx;
 	JTextField tf[];
@@ -116,7 +117,7 @@ public class AddToMovie implements AddToCollection {
 			}
 		});
 		
-		JPanel south = new JPanel();
+		south = new JPanel();
 		save = new JButton("저장");
 		JButton close = new JButton("닫기");
 		close.addActionListener(new ActionListener() {
@@ -141,7 +142,14 @@ public class AddToMovie implements AddToCollection {
 	
 	public void show() {
 		di.pack();
-		di.setLocationRelativeTo(TVAPanel.getInstance());
+		di.setLocationRelativeTo(MoviePanel.getInstance());
+		di.setModal(true);
+		di.setVisible(true);
+	}
+	
+	public void show(Component component) {
+		di.pack();
+		di.setLocationRelativeTo(component);
 		di.setModal(true);
 		di.setVisible(true);
 	}

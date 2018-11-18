@@ -33,12 +33,12 @@ public class TypeCollection {
 		return tvaMap;
 	}
 	
-	public HashMap<String, TVA> getWatchingTVAMap() {
-		return watchingTVAMap;
-	}
-	
 	public HashMap<String, MovieSeries> getMovieMap() {
 		return movieMap;
+	}
+	
+	public HashMap<String, TVA> getWatchingTVAMap() {
+		return watchingTVAMap;
 	}
 	
 	public TVA getTVAByAddress(String address) {

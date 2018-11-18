@@ -26,7 +26,6 @@ public class TVA implements ElementType {
 	}
 	
 	public TVA(String KOR, String ENG, String JPN, String PD, String note, int QTR, int season, int representValue) {
-		super();
 		this.KOR = KOR;
 		this.ENG = ENG;
 		this.JPN = JPN;
@@ -35,6 +34,17 @@ public class TVA implements ElementType {
 		this.QTR = QTR;
 		this.season = season;
 		this.representValue = representValue;
+	}
+	
+	public TVA() {
+		KOR = "";
+		ENG = "";
+		JPN = "";
+		PD = "";
+		note = "";
+		QTR = 0;
+		season = 1;
+		representValue = 0;
 	}
 	
 	public String getAddress() {
@@ -68,6 +78,7 @@ public class TVA implements ElementType {
 		map.put("qtr", QTR);
 		map.put("note", note);
 		map.put("season", season);
+		map.put("representValue", representValue);
 		return map;
 	}
 	

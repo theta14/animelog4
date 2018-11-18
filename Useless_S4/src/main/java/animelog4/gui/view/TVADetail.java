@@ -648,7 +648,8 @@ public class TVADetail {
 				final String pastAddress = tva.getAddress();
 				if ( tva.getSeriesKey().startsWith("x") ) {
 					String s = JOptionPane.showInputDialog(di, "시리즈 타이틀을 입력해주세요.", "시리즈 타이틀", JOptionPane.QUESTION_MESSAGE);
-					TVASeries ts = new TVASeries(s);
+					if ( s == null || s.trim().isEmpty() ) return;
+					TVASeries ts = new TVASeries(s.trim());
 					ts.add(tva);
 					tc.getTVAMap().put(ts.getKey(), ts);
 				}

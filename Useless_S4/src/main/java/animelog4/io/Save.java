@@ -58,7 +58,7 @@ public class Save {
 		HashMap<String, TVA> map = TypeCollection.getInstance().getWatchingTVAMap();
 		for ( String key : map.keySet() ) {
 			TVA t = map.get(key);
-			jsonObject.put(t.getSeriesKey(), t);
+			jsonObject.put(t.getSeriesKey(), t.toMap());
 		}
 		putFileContent("data/watchingTVA.json", jsonObject.toJSONString());
 	}
@@ -104,6 +104,10 @@ public class Save {
 		jsonObject.put("selectedTVAHeader", info.getSelectedTVAHeader());
 		jsonObject.put("selectedMovieHeader", info.getSelectedMovieHeader());
 		putFileContent("data/userInfo.json", jsonObject.toJSONString());
+	}
+	
+	public void memo() {
+		putFileContent("data/memo.txt", UserInfo.getInstance().getMemo());
 	}
 	
 }

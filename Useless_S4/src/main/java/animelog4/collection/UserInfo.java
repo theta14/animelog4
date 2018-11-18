@@ -15,6 +15,7 @@ public class UserInfo {
 	private String imageFilePath;
 	private int selectedTVAHeader;
 	private int selectedMovieHeader;
+	private String memo;
 	
 	private UserInfo() {
 		save = new Save();
@@ -54,6 +55,10 @@ public class UserInfo {
 	public void setSelectedMovieHeader(int selectedMovieHeader) {
 		this.selectedMovieHeader = selectedMovieHeader;
 		save.userInfo();
+	}
+	
+	public void setMemo(String memo) {
+		this.memo = memo;
 	}
 	
 	public String getImageFilePath() {

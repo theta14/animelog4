@@ -30,104 +30,93 @@ public class Load {
 		return String.valueOf(ch).trim();
 	}
 	
-	public void tva() {
+	private JSONObject getParsedJSONData(String s) {
 		try {
-			String data = getFileContent("data/tva.json");
-			JSONObject parsedData = (JSONObject) new JSONParser().parse(data);
-			TypeCollection tc = TypeCollection.getInstance();
-			
-			for ( Object key : parsedData.keySet() ) {
-				JSONObject each = (JSONObject) parsedData.get(key);
-				String movieSeriesKey = (String) each.get("movieSeriesKey");
-				String title = (String) each.get("title");
-				TVASeries ts = new TVASeries(key.toString(), title, movieSeriesKey.isEmpty() ? null : movieSeriesKey);
-				
-				JSONArray tvas = (JSONArray) each.get("tvas");
-				for (int i=0; i<tvas.size(); i++) {
-					JSONObject o = (JSONObject) tvas.get(i);
-					ts.add(new TVA(o));
-				}
-				tc.getTVAMap().put(key.toString(), ts);
-			}
+			String data = getFileContent(s);
+			return (JSONObject) new JSONParser().parse(data);
 		}
 		catch(IOException e) {
 			e.printStackTrace();
+			return null;
 		}
 		catch(ParseException e) {
 			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public void tva() {
+		JSONObject parsedData = getParsedJSONData("data/tva.json");
+		TypeCollection tc = TypeCollection.getInstance();
+		
+		for ( Object key : parsedData.keySet() ) {
+			JSONObject each = (JSONObject) parsedData.get(key);
+			String movieSeriesKey = (String) each.get("movieSeriesKey");
+			String title = (String) each.get("title");
+			TVASeries ts = new TVASeries(key.toString(), title, movieSeriesKey.isEmpty() ? null : movieSeriesKey);
+			
+			JSONArray tvas = (JSONArray) each.get("tvas");
+			for (int i=0; i<tvas.size(); i++) {
+				JSONObject o = (JSONObject) tvas.get(i);
+				ts.add(new TVA(o));
+			}
+			tc.getTVAMap().put(key.toString(), ts);
 		}
 	}
 	
 	public void watcingTVA() {
-		try {
-			String data = getFileContent("data/watchingTVA.json");
-			JSONObject parsedData = (JSONObject) new JSONParser().parse(data);
-			TypeCollection tc = TypeCollection.getInstance();
-			
-			for ( Object key : parsedData.keySet() ) {
-				JSONObject o = (JSONObject) parsedData.get(key);
-				TVA t = new TVA(o);
-				t.setSeriesKey((String) key);
-				tc.getWatchingTVAMap().put(t.getAddress(), t);
-			}
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-		catch(ParseException e) {
-			e.printStackTrace();
+		JSONObject parsedData = getParsedJSONData("data/watchingTVA.json");
+		TypeCollection tc = TypeCollection.getInstance();
+		
+		for ( Object key : parsedData.keySet() ) {
+			JSONObject o = (JSONObject) parsedData.get(key);
+			TVA t = new TVA(o);
+			t.setSeriesKey((String) key);
+			tc.getWatchingTVAMap().put(t.getAddress(), t);
 		}
 	}
 	
 	public void movie() {
-		try {
-			String data = getFileContent("data/movie.json");
-			JSONObject parsedData = (JSONObject) new JSONParser().parse(data);
-			TypeCollection tc = TypeCollection.getInstance();
+		JSONObject parsedData = getParsedJSONData("data/movie.json");
+		TypeCollection tc = TypeCollection.getInstance();
+		
+		for ( Object key : parsedData.keySet() ) {
+			JSONObject each = (JSONObject) parsedData.get(key);
+			String tvaSeriesKey = (String) each.get("tvaSeriesKey");
+			MovieSeries ms = new MovieSeries(key.toString(), tvaSeriesKey);
 			
-			for ( Object key : parsedData.keySet() ) {
-				JSONObject each = (JSONObject) parsedData.get(key);
-				String tvaSeriesKey = (String) each.get("tvaSeriesKey");
-				MovieSeries ms = new MovieSeries(key.toString(), tvaSeriesKey);
-				
-				JSONArray movies = (JSONArray) each.get("movies");
-				for (int i=0; i<movies.size(); i++) {
-					JSONObject o = (JSONObject) movies.get(i);
-					ms.add(new Movie(o));
-				}
-				tc.getMovieMap().put(key.toString(), ms);
+			JSONArray movies = (JSONArray) each.get("movies");
+			for (int i=0; i<movies.size(); i++) {
+				JSONObject o = (JSONObject) movies.get(i);
+				ms.add(new Movie(o));
 			}
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-		catch(ParseException e) {
-			e.printStackTrace();
+			tc.getMovieMap().put(key.toString(), ms);
 		}
 	}
 	
 	public void userInfo() {
 		UserInfo info = UserInfo.getInstance();
 		try {
-			String data = getFileContent("data/userInfo.json");
-			JSONObject parsedData = (JSONObject) new JSONParser().parse(data);
-			
+			JSONObject parsedData = getParsedJSONData("data/userInfo.json");
 			info.setSavePopUp((Boolean) parsedData.get("savePopUp"));
 			info.setImageFilePath((String) parsedData.get("imageFilePath"));
 			info.setSelectedTVAHeader(((Long) parsedData.get("selectedTVAHeader")).intValue());
 			info.setSelectedMovieHeader(((Long) parsedData.get("selectedMovieHeader")).intValue());
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-		catch(ParseException e) {
-			e.printStackTrace();
 		}
 		catch(NullPointerException e) {
 			info.setSavePopUp(false);
 			info.setImageFilePath(System.getProperty("user.home") + "/Desktop");
 			info.setSelectedTVAHeader(0);
 			info.setSelectedMovieHeader(0);
+		}
+	}
+	
+	public void memo() {
+		try {
+			UserInfo.getInstance().setMemo(getFileContent("data/memo.txt"));
+		}
+		catch(IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
