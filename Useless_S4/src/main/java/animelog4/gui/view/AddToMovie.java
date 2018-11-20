@@ -77,6 +77,7 @@ public class AddToMovie implements AddToCollection {
 			add(new JLabel(s[i], JLabel.CENTER), 0, i+1, 1, 1);
 			add(tf[i], 1, i+1, 2, 1);
 		}
+		tf[0].addAncestorListener(new RequestFocusListener());
 		
 		tf[3].setEditable(false);
 		tf[3].setBackground(Color.WHITE);

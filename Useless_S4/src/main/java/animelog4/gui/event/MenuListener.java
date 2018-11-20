@@ -6,9 +6,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
@@ -18,12 +15,10 @@ import javax.swing.JRadioButton;
 
 import animelog4.collection.RemovedImageList;
 import animelog4.collection.TypeCollection;
-import animelog4.gui.view.Memo;
+import animelog4.gui.view.PlannedToWatch;
 import animelog4.gui.view.Search;
 import animelog4.gui.view.WatchingTVA;
 import animelog4.io.Save;
-import animelog4.type.Movie;
-import animelog4.type.TVA;
 
 public class MenuListener implements ActionListener {
 	private static int selection = 0;
@@ -34,7 +29,7 @@ public class MenuListener implements ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		final String rbtns[] = { "정보", "검색", "시청 중인 TVA", "메모", "파일 저장", "종료", "디버깅용" };
+		final String rbtns[] = { "정보", "검색", "시청 중인 TVA", "시청 예정 목록", "파일 저장", "종료" };
 		JRadioButton rbtn[] = new JRadioButton[rbtns.length];
 		ButtonGroup g = new ButtonGroup();
 		JPanel p = new JPanel();
@@ -105,7 +100,7 @@ public class MenuListener implements ActionListener {
 			break;
 			
 		case 3:
-			new Memo();
+			new PlannedToWatch();
 			break;
 			
 		case 4:
@@ -114,7 +109,7 @@ public class MenuListener implements ActionListener {
 			save.movie();
 			save.watchingTVA();
 			save.userInfo();
-			save.memo();
+			save.planned();
 			JOptionPane.showMessageDialog(component, "저장 완료", "파일 저장", JOptionPane.INFORMATION_MESSAGE);
 			break;
 			
@@ -125,42 +120,6 @@ public class MenuListener implements ActionListener {
 					new File("image/" + ril.get(i).getKey()).delete();
 			System.exit(0);
 			break;
-			
-		default:
-			System.out.println("====================================================================================");
-			ArrayList<String> a = new ArrayList<String>();
-			tc = TypeCollection.getInstance();
-			
-			for ( String key : tc.getTVAMap().keySet() ) {
-				Map<Integer, TVA> map = tc.getTVAMap().get(key).getElementMap();
-				for ( int intKey : map.keySet() ) {
-					a.add("{" + map.get(intKey).getKOR() + " / " + map.get(intKey).getAddress() + "}");
-				}
-			}
-			Collections.sort(a);
-			System.out.println(a);
-			System.out.println(a.size());
-			
-			a = new ArrayList<String>();
-			for ( String key : tc.getMovieMap().keySet() ) {
-				Map<Integer, Movie> map = tc.getMovieMap().get(key).getElementMap();
-				for ( int intKey : map.keySet() ) {
-					a.add("{" + map.get(intKey).getKOR() + " / " + map.get(intKey).getAddress() + "}");
-				}
-			}
-			Collections.sort(a);
-			System.out.println(a);
-			System.out.println(a.size());
-			
-			a = new ArrayList<String>();
-			for ( String key : tc.getWatchingTVAMap().keySet() ) {
-				TVA tva = tc.getWatchingTVAMap().get(key);
-				a.add("{" + tva.getKOR() + " / " + tva.getAddress() + "}");
-			}
-			Collections.sort(a);
-			System.out.println(a);
-			System.out.println(a.size());
-			System.out.println("====================================================================================");
 		}
 			
 	}

@@ -25,7 +25,7 @@ public class WatchingTVA implements TypePanel {
 	private ALTable table;
 	
 	public WatchingTVA() {
-		TypeCollection tc = TypeCollection.getInstance();
+		final TypeCollection tc = TypeCollection.getInstance();
 		di = new ALDialog(String.format("시청 중인 TVA (%d개)", tc.getWatchingTVAMap().size()));
 		final String header[] = { "SER", "KOR", "ENG", "JPN", "제작사", "쿨", "Address" };
 		
@@ -46,6 +46,8 @@ public class WatchingTVA implements TypePanel {
 		JButton remove = new JButton("삭제");
 		add.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				final int size = tc.getWatchingTVAMap().size();
+				
 				AddToTVA att = new AddToTVA();
 				att.setDialog();
 				att.getSeries().removeAncestorListener(att.getSeries().getAncestorListeners()[0]);
@@ -55,6 +57,8 @@ public class WatchingTVA implements TypePanel {
 				ElementAddEvent eae = new ElementAddEvent(att.getDi());
 				att.getSave().addActionListener(eae.getWatchingTVAActionListener(table, att.getCbx(), att.getChbox(), att.getSeries(), att.getRbtn(), att.getTf(), att.getSpnr(), att.getSeason(), att.getTa()));
 				att.show(di);
+				
+				if ( size < tc.getWatchingTVAMap().size() ) di.setTitle(String.format("시청 중인 TVA (%d개)", tc.getWatchingTVAMap().size()));
 			}
 		});
 		ElementRemoveEvent ere = new ElementRemoveEvent(this, di);

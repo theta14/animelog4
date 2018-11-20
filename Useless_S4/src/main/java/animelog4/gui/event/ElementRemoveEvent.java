@@ -10,6 +10,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JOptionPane;
 
 import animelog4.collection.TypeCollection;
+import animelog4.gui.component.ALDialog;
 import animelog4.gui.component.ALTable;
 import animelog4.gui.view.BasePanel;
 import animelog4.gui.view.MoviePanel;
@@ -63,6 +64,8 @@ public class ElementRemoveEvent {
 		case TypePanel.WATCHING_TVA:
 			String address = (String) table.getModel().getValueAt(selectedRow, 6);
 			tc.getWatchingTVAMap().remove(address);
+			ALDialog di = (ALDialog) c;
+			di.setTitle(String.format("시청 중인 TVA (%d개)", tc.getWatchingTVAMap().size()));
 			break;
 			
 		case TypePanel.SEARCHED_TVA:

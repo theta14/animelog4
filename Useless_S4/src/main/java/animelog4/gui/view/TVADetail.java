@@ -662,7 +662,7 @@ public class TVADetail {
 				}
 				
 				tc.getWatchingTVAMap().remove(pastAddress);
-				sourceTable.getDefaultTableModel().removeRow(sourceTable.convertColumnIndexToModel(sourceTable.getSelectedRow()));
+				sourceTable.getDefaultTableModel().removeRow(sourceTable.convertRowIndexToModel(sourceTable.getSelectedRow()));
 				
 				String row[] = { tc.getTVAMap().get(tva.getSeriesKey()).getTitleFrontChar(), tva.getKOR(), tva.getENG(), tva.getJPN(), tva.getPD(), Integer.toString(tva.getQTR()), tva.getAddress() };
 				TVAPanel.getInstance().getTable().getDefaultTableModel().addRow(row);

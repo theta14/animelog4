@@ -149,7 +149,7 @@ public class ElementAddEvent {
 				tc.getWatchingTVAMap().put(t.getAddress(), t);
 				
 				String row[] = { title, t.getKOR(), t.getENG(), t.getJPN(), t.getPD(), Integer.toString(t.getQTR()), t.getAddress() };
-				table.getDefaultTableModel().addRow(row);
+				if ( table != null ) table.getDefaultTableModel().addRow(row);
 				di.dispose();
 			}
 		};

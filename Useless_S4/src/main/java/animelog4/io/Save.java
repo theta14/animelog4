@@ -10,10 +10,12 @@ import java.util.Map;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import animelog4.collection.PlannedCollection;
 import animelog4.collection.TypeCollection;
 import animelog4.collection.UserInfo;
 import animelog4.type.Movie;
 import animelog4.type.MovieSeries;
+import animelog4.type.Planned;
 import animelog4.type.TVA;
 import animelog4.type.TVASeries;
 
@@ -106,8 +108,15 @@ public class Save {
 		putFileContent("data/userInfo.json", jsonObject.toJSONString());
 	}
 	
-	public void memo() {
-		putFileContent("data/memo.txt", UserInfo.getInstance().getMemo());
+	@SuppressWarnings("unchecked")
+	public void planned() {
+		JSONObject jsonObject = new JSONObject();
+		HashMap<String, Planned> map = PlannedCollection.getInstance().getPlannedMap();
+		for ( String key : map.keySet() ) {
+			Planned p = map.get(key);
+			jsonObject.put(p.getAddress(), p.toMap());
+		}
+		putFileContent("data/planned.json", jsonObject.toJSONString());
 	}
 	
 }

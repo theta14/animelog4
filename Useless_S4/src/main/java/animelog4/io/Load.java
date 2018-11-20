@@ -11,10 +11,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import animelog4.collection.PlannedCollection;
 import animelog4.collection.TypeCollection;
 import animelog4.collection.UserInfo;
 import animelog4.type.Movie;
 import animelog4.type.MovieSeries;
+import animelog4.type.Planned;
 import animelog4.type.TVA;
 import animelog4.type.TVASeries;
 
@@ -111,12 +113,16 @@ public class Load {
 		}
 	}
 	
-	public void memo() {
-		try {
-			UserInfo.getInstance().setMemo(getFileContent("data/memo.txt"));
-		}
-		catch(IOException e) {
-			e.printStackTrace();
+	public void planned() {
+		JSONObject parsedData = getParsedJSONData("data/planned.json");
+		PlannedCollection pc = PlannedCollection.getInstance();
+		if ( parsedData == null ) return;
+		
+		for ( Object key : parsedData.keySet() ) {
+			JSONObject o = (JSONObject) parsedData.get(key);
+			Planned p = new Planned(o);
+			p.setAddress((String) key);
+			pc.add(p);
 		}
 	}
 }

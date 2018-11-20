@@ -15,7 +15,7 @@ public class App {
 		load.watcingTVA();
 		load.movie();
 		load.userInfo();
-		load.memo();
+		load.planned();
 		
 		MainFrame frame = new MainFrame("Anime Log Ⅳ");
 		frame.setVisible(true);
