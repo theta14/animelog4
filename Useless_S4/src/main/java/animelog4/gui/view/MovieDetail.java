@@ -303,6 +303,10 @@ public class MovieDetail {
 				movie.setOrder(order);
 				movie.setNote(note);
 				
+				if ( order != pastOrder ) {
+					ms.getElementMap().remove(pastOrder);
+					ms.add(movie);
+				}
 				if ( !ms.getTVASeriesKey().equals(ts.getKey()) ) {
 					MovieSeries newMS;
 					if ( matchedMovieSeries == null ) newMS = new MovieSeries(ts.getKey());
