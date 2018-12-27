@@ -118,7 +118,7 @@ public class MenuListener implements ActionListener {
 			if ( !save.userInfo() ) sb.append("에러 발생: 사용자 설정 저장\n");
 			if ( !save.planned() ) sb.append("에러 발생: 시청 예정 항목 저장\n");
 			
-			if ( sb.toString().isEmpty() )
+			if ( !sb.toString().isEmpty() )
 				JOptionPane.showMessageDialog(component, sb.toString(), "에러 발생", JOptionPane.ERROR_MESSAGE);
 			else
 				JOptionPane.showMessageDialog(component, "저장 완료", "파일 저장", JOptionPane.INFORMATION_MESSAGE);
