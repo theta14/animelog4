@@ -22,19 +22,21 @@ import animelog4.type.TVASeries;
 public class Save {
 	private final String ENCODING = "UTF-8";
 	
-	private void putFileContent(String path, String strToSave) {
+	private boolean putFileContent(String path, String strToSave) {
 		try {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), ENCODING));
 			bw.write(strToSave);
 			bw.close();
+			return true;
 		}
 		catch(IOException e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void tva() {
+	public boolean tva() {
 		TypeCollection tc = TypeCollection.getInstance();
 		JSONObject jsonObject = new JSONObject();
 		
@@ -51,22 +53,22 @@ public class Save {
 			jsonObject.put(key, series);
 		}
 		
-		putFileContent("data/tva.json", jsonObject.toJSONString());
+		return putFileContent("data/tva.json", jsonObject.toJSONString());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void watchingTVA() {
+	public boolean watchingTVA() {
 		JSONObject jsonObject = new JSONObject();
 		HashMap<String, TVA> map = TypeCollection.getInstance().getWatchingTVAMap();
 		for ( String key : map.keySet() ) {
 			TVA t = map.get(key);
 			jsonObject.put(t.getSeriesKey(), t.toMap());
 		}
-		putFileContent("data/watchingTVA.json", jsonObject.toJSONString());
+		return putFileContent("data/watchingTVA.json", jsonObject.toJSONString());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void movie() {
+	public boolean movie() {
 		TypeCollection tc = TypeCollection.getInstance();
 		JSONObject jsonObject = new JSONObject();
 		
@@ -94,29 +96,29 @@ public class Save {
 			jsonObject.put(key, series);
 		}
 		
-		putFileContent("data/movie.json", jsonObject.toJSONString());
+		return putFileContent("data/movie.json", jsonObject.toJSONString());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void userInfo() {
+	public boolean userInfo() {
 		UserInfo info = UserInfo.getInstance();
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("savePopUp", info.getSavePopUp());
 		jsonObject.put("imageFilePath", info.getImageFilePath());
 		jsonObject.put("selectedTVAHeader", info.getSelectedTVAHeader());
 		jsonObject.put("selectedMovieHeader", info.getSelectedMovieHeader());
-		putFileContent("data/userInfo.json", jsonObject.toJSONString());
+		return putFileContent("data/userInfo.json", jsonObject.toJSONString());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void planned() {
+	public boolean planned() {
 		JSONObject jsonObject = new JSONObject();
 		HashMap<String, Planned> map = PlannedCollection.getInstance().getPlannedMap();
 		for ( String key : map.keySet() ) {
 			Planned p = map.get(key);
 			jsonObject.put(p.getAddress(), p.toMap());
 		}
-		putFileContent("data/planned.json", jsonObject.toJSONString());
+		return putFileContent("data/planned.json", jsonObject.toJSONString());
 	}
 	
 }

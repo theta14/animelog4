@@ -17,17 +17,15 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -44,10 +42,10 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import animelog4.collection.TypeCollection;
-import animelog4.collection.UserInfo;
 import animelog4.gui.component.ALDialog;
 import animelog4.gui.component.ALTable;
 import animelog4.gui.component.RequestFocusListener;
+import animelog4.gui.event.DividedElementsAdd;
 import animelog4.gui.event.ImageClickEvent;
 import animelog4.type.Movie;
 import animelog4.type.MovieSeries;
@@ -354,20 +352,7 @@ public class MovieDetail {
 				}
 				
 				di.setTitle("상세정보");
-			}
-		});
-		
-		di.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				UserInfo ui = UserInfo.getInstance();
-				if ( !ui.getSavePopUp() ) {
-					if ( di.getTitle().contains("*") ) {
-						JCheckBox chbx = new JCheckBox("다시 표시하지 않기");
-						int ans = JOptionPane.showConfirmDialog(di, new Object[] { "변경사항이 있습니다.\n저장하시겠습니까?" , chbx }, "변경사항", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						if ( chbx.isSelected() ) UserInfo.getInstance().setSavePopUp(true);
-						if ( ans == JOptionPane.YES_OPTION ) save.doClick();
-					}
-				}
+				di.setFixing(false);
 			}
 		});
 		
@@ -400,6 +385,7 @@ public class MovieDetail {
 		basePanel.add(leftPanel);
 		basePanel.add(rightPanel);
 		
+		di.setSaveButton(save);
 		di.add(basePanel);
 		di.add(save, BorderLayout.SOUTH);
 		di.setSize((int) (width * 2.4), (int) (height * 1.1));
@@ -441,8 +427,71 @@ public class MovieDetail {
 			}
 		});
 		
+		JButton fixAll = new JButton("일괄 수정");
+		fixAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				final int div = ms.getElementMap().size();
+				JPanel grid = new JPanel(new GridLayout(1, div));
+				final AddToMovie atm[] = new AddToMovie[div];
+				ArrayList<Movie> movieList = new ArrayList<Movie>(ms.getElementMap().values());
+				for (int i=0; i<div; i++) {
+					atm[i] = new AddToMovie();
+					atm[i].setFromElement(movieList.get(i));
+					grid.add(atm[i].getCenter());
+				}
+				atm[0].getTf()[0].addAncestorListener(new RequestFocusListener());
+				
+				final ALDialog divDialog = new ALDialog("일괄 수정");
+				divDialog.add(grid);
+				
+				JButton save = new JButton("저장");
+				save.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e1) {
+						if ( JOptionPane.showConfirmDialog(divDialog, "저장하시겠습니까?", "저장", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION )
+							return;
+						DividedElementsAdd dea = new DividedElementsAdd();
+						String message = dea.fixedMovieEntirely(ms, atm);
+						if ( message != null ) {
+							JOptionPane.showMessageDialog(divDialog, message, "분할 에러", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						
+						ArrayList<Movie> list = new ArrayList<Movie>(ms.getElementMap().values());
+						ALTable sourceTable = MoviePanel.getInstance().getTable();
+						for (int i=sourceTable.getRowCount()-1; i>=0; i--) {
+							for (int j=0; j<list.size(); j++) {
+								if ( ((String) sourceTable.getModel().getValueAt(i, 5)).equals(list.get(j).getAddress()) ) {
+									sourceTable.getDefaultTableModel().removeRow(i);
+									list.remove(j);
+									break;
+								}
+							}
+						}
+						
+						Movie m[] = dea.getMovieArray();
+						ms.getElementMap().clear();
+						String tva = tc.getTVAMap().get(ms.getTVASeriesKey()).getTitle();
+						for (int i=0; i<m.length; i++) {
+							ms.add(m[i]);
+							String row[] = { tva, m[i].getKOR(), m[i].getENG(), m[i].getJPN(), m[i].getPD(), m[i].getAddress() };
+							sourceTable.getDefaultTableModel().addRow(row);
+						}
+						divDialog.dispose();
+					}
+				});
+				
+				divDialog.add(save, BorderLayout.SOUTH);
+				divDialog.pack();
+				divDialog.setLocationRelativeTo(di);
+				di.dispose();
+				divDialog.setModal(true);
+				divDialog.setVisible(true);
+			}
+		});
+		
 		di.add(tf, BorderLayout.NORTH);
 		di.add(list);
+		di.add(fixAll, BorderLayout.SOUTH);
 		
 		di.pack();
 		di.setWidth((int) (di.getWidth() * 1.2));
@@ -453,6 +502,7 @@ public class MovieDetail {
 	
 	private void setTitleChanged(ALDialog di, String s) {
 		di.setTitle("*" + s);
+		di.setFixing(true);
 	}
 	
 	public static ImageIcon getProperIcon(String path, JPanel p) {

@@ -54,6 +54,8 @@ public class MenuListener implements ActionListener {
 		if ( answer != JOptionPane.OK_OPTION ) return;
 		
 		switch (selection) {
+		
+		// information
 		case 0:
 			TypeCollection tc = TypeCollection.getInstance();
 			StringBuilder sb = new StringBuilder("TVA 시리즈 수: ");
@@ -81,6 +83,7 @@ public class MenuListener implements ActionListener {
 			JOptionPane.showMessageDialog(component, sb.toString(), "정보", JOptionPane.INFORMATION_MESSAGE);
 			break;
 			
+		// search
 		case 1:
 			String s = JOptionPane.showInputDialog(component, "검색어를 입력하세요.", "검색", JOptionPane.QUESTION_MESSAGE);
 			try {
@@ -95,24 +98,33 @@ public class MenuListener implements ActionListener {
 			search.show();
 			break;
 			
+		// watching
 		case 2:
 			new WatchingTVA();
 			break;
 			
+		// plan to watch
 		case 3:
 			new PlannedToWatch();
 			break;
 			
+		// save as file
 		case 4:
 			Save save = new Save();
-			save.tva();
-			save.movie();
-			save.watchingTVA();
-			save.userInfo();
-			save.planned();
-			JOptionPane.showMessageDialog(component, "저장 완료", "파일 저장", JOptionPane.INFORMATION_MESSAGE);
+			sb = new StringBuilder("");
+			if ( !save.tva() ) sb.append("에러 발생: TVA 항목 저장\n");
+			if ( !save.movie() ) sb.append("에러 발생: 극장판 항목 저장\n");
+			if ( !save.watchingTVA() ) sb.append("에러 발생: 시청 중인 항목 저장\n");
+			if ( !save.userInfo() ) sb.append("에러 발생: 사용자 설정 저장\n");
+			if ( !save.planned() ) sb.append("에러 발생: 시청 예정 항목 저장\n");
+			
+			if ( sb.toString().isEmpty() )
+				JOptionPane.showMessageDialog(component, sb.toString(), "에러 발생", JOptionPane.ERROR_MESSAGE);
+			else
+				JOptionPane.showMessageDialog(component, "저장 완료", "파일 저장", JOptionPane.INFORMATION_MESSAGE);
 			break;
 			
+		// exit
 		case 5:
 			RemovedImageList ril = RemovedImageList.getInstance();
 			for (int i=0; i<ril.size(); i++)

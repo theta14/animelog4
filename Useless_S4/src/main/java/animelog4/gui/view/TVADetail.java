@@ -14,10 +14,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Vector;
 
@@ -40,7 +39,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import animelog4.collection.TypeCollection;
-import animelog4.collection.UserInfo;
 import animelog4.gui.component.ALDialog;
 import animelog4.gui.component.ALTable;
 import animelog4.gui.component.RequestFocusListener;
@@ -412,6 +410,10 @@ public class TVADetail {
 				tva.setNote(note);
 				tva.setRepresentValue(representValue);
 				
+				if ( season != pastSeason ) {
+					ts.getElementMap().remove(pastSeason);
+					ts.add(tva);
+				}
 				if ( !tc.getTVAMap().get(pastSeriesKey).equals(ts) ) {
 					ts.add(tva);
 					if ( !tvaSeriesExists ) tc.getTVAMap().put(ts.getKey(), ts);
@@ -454,6 +456,7 @@ public class TVADetail {
 				}
 				
 				di.setTitle("상세정보");
+				di.setFixing(false);
 			}
 		});
 		divide.addActionListener(new ActionListener() {
@@ -502,8 +505,10 @@ public class TVADetail {
 							return;
 						}
 						for (int i=0; i<sourceTable.getRowCount(); i++)
-							if ( ((String) sourceTable.getModel().getValueAt(i, 6)).equals(tva.getAddress()) )
+							if ( ((String) sourceTable.getModel().getValueAt(i, 6)).equals(tva.getAddress()) ) {
 								sourceTable.getDefaultTableModel().removeRow(i);
+								break;
+							}
 						
 						TVA t[] = dea.getTVAArray();
 						String frontChar = tc.getTVAMap().get(tva.getSeriesKey()).getTitleFrontChar();
@@ -526,6 +531,7 @@ public class TVADetail {
 		south = new JPanel(new GridLayout(1, 2));
 		south.add(save);
 		south.add(divide);
+		di.setSaveButton(save);
 	}
 	
 	private void setElementDialogWatchingSouthPanel(String address) {
@@ -638,6 +644,7 @@ public class TVADetail {
 				sourceTable.getModel().setValueAt(tva.getAddress(), sourceTable.convertRowIndexToModel(row), 6);
 				
 				di.setTitle("상세정보");
+				di.setFixing(false);
 			}
 		});
 		done.addActionListener(new ActionListener() {
@@ -647,7 +654,7 @@ public class TVADetail {
 				
 				final String pastAddress = tva.getAddress();
 				if ( tva.getSeriesKey().startsWith("x") ) {
-					String s = JOptionPane.showInputDialog(di, "시리즈 타이틀을 입력해주세요.", "시리즈 타이틀", JOptionPane.QUESTION_MESSAGE);
+					String s = (String) JOptionPane.showInputDialog(null, "시리즈 타이틀을 입력해주세요", "시리즈 타이틀", JOptionPane.QUESTION_MESSAGE, null, null, tva.toString());
 					if ( s == null || s.trim().isEmpty() ) return;
 					TVASeries ts = new TVASeries(s.trim());
 					ts.add(tva);
@@ -673,26 +680,10 @@ public class TVADetail {
 		south = new JPanel(new GridLayout(1, 2));
 		south.add(save);
 		south.add(done);
+		di.setSaveButton(save);
 	}
 	
 	private void setElementDialogShown() {
-		di.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				UserInfo ui = UserInfo.getInstance();
-				if ( !ui.getSavePopUp() ) {
-					if ( di.getTitle().contains("*") ) {
-						JCheckBox chbx = new JCheckBox("다시 표시하지 않기");
-						int ans = JOptionPane.showConfirmDialog(di, new Object[] { "변경사항이 있습니다.\n저장하시겠습니까?" , chbx }, "변경사항", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						if ( chbx.isSelected() ) UserInfo.getInstance().setSavePopUp(true);
-						if ( ans == JOptionPane.YES_OPTION ) {
-							Component c[] = south.getComponents();
-							((JButton) c[0]).doClick();
-							// this is save button
-						}
-					}
-				}
-			}
-		});
 		di.add(south, BorderLayout.SOUTH);
 		di.pack();
 		di.setWidth((int) (di.getWidth() * 1.2));
@@ -703,7 +694,7 @@ public class TVADetail {
 	
 	public void showSeriesDialog(String seriesKey) {
 		final ALDialog di = new ALDialog("시리즈 정보");
-		final ALTable sourceTable = BasePanel.getInstance().getElementPanel().getTable();
+		final ALTable sourceTable = TVAPanel.getInstance().getTable();
 		final TVASeries ts = tc.getTVAMap().get(seriesKey);
 		if ( ts == null ) {
 			JOptionPane.showMessageDialog(upperComponent, "아직 등록되어 있지 않습니다.", "미등록", JOptionPane.WARNING_MESSAGE);
@@ -745,6 +736,7 @@ public class TVADetail {
 			public void actionPerformed(ActionEvent e) {
 				ts.setTitle(tf.getText());
 				di.setTitle("시리즈 정보");
+				di.setFixing(false);
 				String s = ts.getTitleFrontChar();
 				for (int i=0; i<sourceTable.getRowCount(); i++) {
 					String value = (String) sourceTable.getModel().getValueAt(sourceTable.convertRowIndexToModel(i), 6);
@@ -753,6 +745,65 @@ public class TVADetail {
 						if ( (i + 1) == ts.getElementMap().size() ) return;
 					}
 				}
+			}
+		});
+		JButton fixAll = new JButton("일괄 수정");
+		fixAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				final int div = ts.getElementMap().size();
+				JPanel grid = new JPanel(new GridLayout(1, div));
+				final AddToTVA att[] = new AddToTVA[div];
+				ArrayList<TVA> tvaList = new ArrayList<TVA>(ts.getElementMap().values());
+				for (int i=0; i<div; i++) {
+					att[i] = new AddToTVA();
+					att[i].setFromElement(tvaList.get(i));
+					grid.add(att[i].getCenter());
+				}
+				att[0].getTf()[0].addAncestorListener(new RequestFocusListener());
+				
+				final ALDialog divDialog = new ALDialog("일괄 수정");
+				divDialog.add(grid);
+				JButton save = new JButton("저장");
+				save.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e1) {
+						if ( JOptionPane.showConfirmDialog(divDialog, "저장하시겠습니까?", "저장", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION )
+							return;
+						DividedElementsAdd dea = new DividedElementsAdd();
+						String message = dea.fixedTVAEntirely(ts, att);
+						if ( message != null ) {
+							JOptionPane.showMessageDialog(divDialog, message, "분할 에러", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						
+						ArrayList<TVA> list = new ArrayList<TVA>(ts.getElementMap().values());
+						for (int i=sourceTable.getRowCount()-1; i>=0; i--) {
+							for (int j=0; j<list.size(); j++) {
+								if ( ((String) sourceTable.getModel().getValueAt(i, 6)).equals(list.get(j).getAddress()) ) {
+									sourceTable.getDefaultTableModel().removeRow(i);
+									list.remove(j);
+									break;
+								}
+							}
+						}
+						
+						TVA t[] = dea.getTVAArray();
+						ts.getElementMap().clear();
+						String frontChar = ts.getTitleFrontChar();
+						for (int i=0; i<t.length; i++) {
+							ts.add(t[i]);
+							String row[] = { frontChar, t[i].getKOR(), t[i].getENG(), t[i].getJPN(), t[i].getPD(), Integer.toString(t[i].getQTR()), t[i].getAddress() };
+							sourceTable.getDefaultTableModel().addRow(row);
+						}
+						divDialog.dispose();
+					}
+				});
+				
+				divDialog.add(save, BorderLayout.SOUTH);
+				divDialog.pack();
+				divDialog.setLocationRelativeTo(di);
+				di.dispose();
+				divDialog.setModal(true);
+				divDialog.setVisible(true);
 			}
 		});
 		
@@ -777,8 +828,13 @@ public class TVADetail {
 		}
 		else di.add(tf, BorderLayout.NORTH);
 		
+		JPanel south = new JPanel(new GridLayout(1, 2));
+		south.add(save);
+		south.add(fixAll);
+		
+		di.setSaveButton(save);
 		di.add(list);
-		di.add(save, BorderLayout.SOUTH);
+		di.add(south, BorderLayout.SOUTH);
 		
 		di.pack();
 		di.setWidth((int) (di.getWidth() * 1.2));
@@ -789,6 +845,7 @@ public class TVADetail {
 	
 	private void setTitleChanged(ALDialog di, String s) {
 		di.setTitle("*" + s);
+		di.setFixing(true);
 	}
 	
 }

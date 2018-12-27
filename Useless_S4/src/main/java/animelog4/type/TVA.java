@@ -47,6 +47,17 @@ public class TVA implements ElementType {
 		representValue = 0;
 	}
 	
+	public void set(TVA t) {
+		KOR = t.KOR;
+		ENG = t.ENG;
+		JPN = t.JPN;
+		PD = t.PD;
+		note = t.note;
+		QTR = t.QTR;
+		season = t.season;
+		representValue = t.representValue;
+	}
+	
 	public String getAddress() {
 		StringBuilder sb = new StringBuilder(seriesKey);
 		sb.append('@');

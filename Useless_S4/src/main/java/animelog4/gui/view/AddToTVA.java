@@ -33,6 +33,8 @@ import animelog4.collection.TypeCollection;
 import animelog4.gui.component.ALDialog;
 import animelog4.gui.component.RequestFocusListener;
 import animelog4.gui.event.ElementAddEvent;
+import animelog4.type.ElementType;
+import animelog4.type.TVA;
 import animelog4.type.TVASeries;
 import lombok.Getter;
 
@@ -220,6 +222,19 @@ public class AddToTVA implements AddToCollection {
 		gbc.gridheight = h;
 		gbl.setConstraints(c, gbc);
 		center.add(c);
+	}
+	
+	public void setFromElement(ElementType element) {
+		TVA tva = (TVA) element;
+		rbtn[tva.getRepresentValue()].setSelected(true);
+		tf[0].setText(tva.getKOR());
+		tf[1].setText(tva.getENG());
+		tf[2].setText(tva.getJPN());
+		tf[3].setText(tva.getPD());
+		spnr.setValue(tva.getQTR());
+		season.setValue(tva.getSeason() + "기");
+		ta.setText(tva.getNote());
+		setDialog();
 	}
 	
 }

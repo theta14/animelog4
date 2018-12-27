@@ -33,6 +33,26 @@ public class Movie implements ElementType {
 		imageKey = Long.toHexString(System.currentTimeMillis());
 	}
 	
+	public Movie() {
+		KOR = "";
+		ENG = "";
+		JPN = "";
+		PD = "";
+		note = "";
+		order = 0;
+		imageKey = "";
+	}
+	
+	public Movie(Movie m) {
+		KOR = m.KOR;
+		ENG = m.ENG;
+		JPN = m.JPN;
+		PD = m.PD;
+		note = m.note;
+		order = m.order;
+		imageKey = m.imageKey;
+	}
+	
 	public String getAddress() {
 		StringBuilder sb = new StringBuilder(seriesKey);
 		sb.append('@');
