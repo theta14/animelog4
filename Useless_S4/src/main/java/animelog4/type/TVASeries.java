@@ -28,7 +28,7 @@ public class TVASeries extends Series<TVA> implements Comparable<TVASeries> {
 	 * Get front 2 letters of the title 
 	 * */
 	public String getTitleFrontChar() {
-		String s = title.replaceAll(" ", "");
+		String s = title.replaceAll(" ", "").toUpperCase();
 		try {
 			return s.substring(0, 2);
 		}

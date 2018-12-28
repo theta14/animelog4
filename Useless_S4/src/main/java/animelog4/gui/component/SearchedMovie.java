@@ -40,7 +40,7 @@ public class SearchedMovie extends JPanel implements TypePanel {
 		String data[][] = new String[size][];
 		for (int i=0; i<size; i++) data[i] = searchedList.get(i).toArray();
 		
-		final String header[] = { "S", "KOR", "ENG", "JPN", "제작사", "Address" };
+		final String header[] = { "TVA", "KOR", "ENG", "JPN", "제작사", "Address" };
 		DefaultTableModel dtm = new DefaultTableModel();
 		dtm.setDataVector(data, header);
 		table = new ALTable(dtm);

@@ -418,6 +418,16 @@ public class TVADetail {
 					ts.add(tva);
 					if ( !tvaSeriesExists ) tc.getTVAMap().put(ts.getKey(), ts);
 					tc.getTVAMap().get(pastSeriesKey).getElementMap().remove(pastSeason);
+					
+					String movieSeriesKey;
+					if ( (movieSeriesKey = tc.getTVAMap().get(pastSeriesKey).getMovieSeriesKey()) != null ) {
+						ts.setMovieSeriesKey(movieSeriesKey);
+						tc.getMovieMap().get(movieSeriesKey).setTVASeriesKey(ts.getKey());
+						ALTable movieTable = MoviePanel.getInstance().getTable();
+						for (int i=0; i<movieTable.getRowCount(); i++)
+							if ( ((String) movieTable.getModel().getValueAt(i, 5)).contains(movieSeriesKey) )
+								movieTable.getModel().setValueAt(ts.getTitle(), i, 0);
+					}
 					if ( tc.getTVAMap().get(pastSeriesKey).getElementMap().isEmpty() )
 						tc.getTVAMap().remove(pastSeriesKey);
 				}
@@ -734,7 +744,11 @@ public class TVADetail {
 		JButton save = new JButton("저장");
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ts.setTitle(tf.getText());
+				if ( tf.getText().trim().isEmpty() ) {
+					JOptionPane.showMessageDialog(di, "비어있습니다.", "공백", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				ts.setTitle(tf.getText().trim());
 				di.setTitle("시리즈 정보");
 				di.setFixing(false);
 				String s = ts.getTitleFrontChar();
